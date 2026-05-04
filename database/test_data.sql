@@ -1,94 +1,86 @@
+
 -- ==========================================
 -- TEST DATA for Development
 -- ==========================================
--- Purpose: Realistic sample data to test queries and features
--- Usage: psql -h localhost -U dividend_user -d dividend_db -f database/test_data.sql
 
 -- Clean existing test data
-
 DELETE FROM transactions;
-DELETE FROM holdings;
-DELETE FROM portfolios WHERE id > 1;
-DELETE FROM users WHERE id > 1;
+DELETE FROM dividend_payments;
+DELETE FROM portfolios;
+DELETE FROM users;
 DELETE FROM stocks;
-
 
 -- Reset sequences
 ALTER SEQUENCE transactions_id_seq RESTART WITH 1;
-ALTER SEQUENCE holdings_id_seq RESTART WITH 1;
-ALTER SEQUENCE users_id_seq RESTART WITH 2;
-ALTER SEQUENCE portfolios_id_seq RESTART WITH 2;
-
-
--- ====================================================
--- STOCKS 
--- ====================================================
-
-INSERT INTO stocks (ticker, company_name) VALUES
-('AAPL', 'Apple Inc.'),
-('MSFT', 'Microsoft Corporation'),
-('JNJ', 'Johnson & Johnson'),
-('KO', 'The Coca-Cola Company'),
-('PEP', 'PepsiCo Inc.'),
-('O', 'Realty Income Corporation'),
-('VZ', 'Verizon Communications Inc.');
+ALTER SEQUENCE dividend_payments_id_seq RESTART WITH 1;
+ALTER SEQUENCE users_id_seq RESTART WITH 1;
+ALTER SEQUENCE portfolios_id_seq RESTART WITH 1;
+ALTER SEQUENCE stocks_id_seq RESTART WITH 1;
 
 -- ====================================================
---USERS 
+-- STOCKS
 -- ====================================================
 
-INSERT INTO users (username, email, password_hash) 
-VALUES ('investor_bob', 'bob@invest.com', 'hash_456');
+INSERT INTO stocks (ticker, company_name, currency, sector, industry, dividend_frequency) VALUES
+('AAPL', 'Apple Inc.',                  'USD', 'Technology',        'Consumer Electronics',      4),
+('MSFT', 'Microsoft Corporation',       'USD', 'Technology',        'Software',                  4),
+('JNJ',  'Johnson & Johnson',           'USD', 'Healthcare',        'Pharmaceuticals',           4),
+('KO',   'The Coca-Cola Company',       'USD', 'Consumer Staples',  'Beverages',                 4),
+('PEP',  'PepsiCo Inc.',                'USD', 'Consumer Staples',  'Beverages',                 4),
+('O',    'Realty Income Corporation',   'USD', 'Real Estate',       'REIT',                     12),
+('VISTA',   'Vista Energy', 'USD', 'Energy',     'Oil & Gas',                   4),
+('ASML', 'ASML Holding',                'EUR', 'Technology',        'Semiconductors',            4),
+('NOVO', 'Novo Nordisk',                'DKK', 'Healthcare',        'Pharmaceuticals',           4),
+('SHEL', 'Shell PLC',                   'GBP', 'Energy',            'Oil & Gas',                 4);
 
 -- ====================================================
---PORTFOLIOS 
+-- USERS
 -- ====================================================
 
--- testuser (id=1) portfolios
-INSERT INTO portfolios (user_id, name) VALUES 
-(1, 'Dividendes Mensuels'),
-(1, 'Croissance Long Terme');
-
--- investor_bob (id=2) portfolio
-INSERT INTO portfolios (user_id, name) VALUES 
-(2, 'Portfolio Retraite');
+INSERT INTO users (username, email, password_hash)
+VALUES
+('testuser',     'test@test.com',   'temporary_hash_123'),
+('investor_bob', 'bob@invest.com',  'hash_456');
 
 -- ====================================================
---HOLDINGS 
+-- PORTFOLIOS
 -- ====================================================
 
--- Portfolio "Mon portefeuille test" (id=1)
-INSERT INTO holdings (portfolio_id, ticker, total_shares, avg_price) VALUES
-(1, 'AAPL', 40.00, 150.00),
-(1, 'MSFT', 50.00, 300.00),
-(1, 'JNJ', 8.00, 160.00);
+-- testuser (id=1)
+INSERT INTO portfolios (user_id, name, currency) VALUES
+(1, 'Dividendes Mensuels',    'EUR'),
+(1, 'Croissance Long Terme',  'USD');
 
--- Portfolio "Dividendes Mensuels" (id=2)
-INSERT INTO holdings (portfolio_id, ticker, total_shares, avg_price) VALUES
-(2, 'KO', 20.00, 55.00),
-(2, 'PEP', 15.00, 170.00),
-(2, 'O', 30.00, 62.00);
-
--- Portfolio "Croissance Long Terme" (id=3) - INTENTIONALLY EMPTY
--- This tests LEFT JOIN and COALESCE in queries
-
--- Portfolio "Portfolio Retraite" (id=4)
-INSERT INTO holdings (portfolio_id, ticker, total_shares, avg_price) VALUES
-(4, 'AAPL', 25.00, 145.00),
-(4, 'VZ', 40.00, 38.00);
+-- investor_bob (id=2)
+INSERT INTO portfolios (user_id, name, currency) VALUES
+(2, 'Portfolio Retraite',     'GBP');
 
 -- ====================================================
--- TRANSACTIONS (optionnel - pour tester l'historique)
+-- TRANSACTIONS
 -- ====================================================
 
--- Exemple : Historique des achats qui ont mené aux holdings ci-dessus
-INSERT INTO transactions (portfolio_id, ticker, "type", quantity, price, transaction_date) VALUES
--- Portfolio 1 - AAPL (total: 10 actions)
-(1, 'AAPL', 'BUY', 10.00, 150.00, '2024-01-15 10:30:00'),
+INSERT INTO transactions (portfolio_id, stock_id, type, quantity, price, fee, transaction_date) VALUES
+-- Portfolio 1 — Dividendes Mensuels
+(1, 1,  'BUY', 10.00, 150.00, 1.50, '2024-01-15 10:30:00'),
+(1, 4,  'BUY', 15.00,  54.00, 1.00, '2024-01-20 09:15:00'),
+(1, 4,  'BUY',  5.00,  58.00, 1.00, '2024-03-05 11:45:00'),
+(1, 6,  'BUY', 30.00,  62.00, 0.00, '2024-02-01 08:00:00'),
 
--- Portfolio 1 - MSFT (total: 5 actions)
-(1, 'MSFT', 'BUY', 5.00, 300.00, '2024-02-10 14:20:00'),
+-- Portfolio 2 — Croissance Long Terme
+(2, 2,  'BUY',  5.00, 300.00, 1.50, '2024-02-10 14:20:00'),
+(2, 8,  'BUY',  8.00, 680.00, 2.00, '2024-03-12 10:00:00'),
 
--- Portfolio 2 - KO (total: 20 actions, achetées en 2 fois)
-(2, 'KO', 'BUY', 15.00, 54.00, '2024-01-20 09:15:00'),
-(2, 'KO', 'BUY', 5.00, 58.00, '2024-03-05 11:45:00');
+-- Portfolio 3 — Portfolio Retraite (investor_bob)
+(3, 1,  'BUY', 25.00, 145.00, 1.50, '2024-01-05 09:00:00'),
+(3, 7,  'BUY', 40.00,  38.00, 1.00, '2024-01-10 11:00:00'),
+(3, 10, 'BUY', 20.00, 2400.00, 3.00, '2024-02-20 15:30:00');
+
+-- ====================================================
+-- DIVIDEND PAYMENTS
+-- ====================================================
+
+INSERT INTO dividend_payments (portfolio_id, stock_id, amount_per_share, total_amount, ex_dividend_date, paid_at) VALUES
+(1, 4,  0.46, 9.20,  '2024-02-09', '2024-03-01'),
+(1, 6,  0.26, 7.80,  '2024-01-31', '2024-02-15'),
+(2, 2,  0.75, 3.75,  '2024-02-14', '2024-03-14'),
+(3, 7,  0.67, 26.80, '2024-02-09', '2024-03-01');

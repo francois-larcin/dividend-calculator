@@ -1,7 +1,6 @@
 --                                                DIVIDEND CALCULATOR _ DATABASE SCHEMA
-
 DROP TABLE IF EXISTS transactions CASCADE;
-DROP TABLE IF EXISTS holdings CASCADE;
+DROP TABLE IF EXISTS dividend_payments CASCADE;
 DROP TABLE IF EXISTS portfolios CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 DROP TABLE IF EXISTS stocks CASCADE;
@@ -9,8 +8,14 @@ DROP TABLE IF EXISTS stocks CASCADE;
 
 --Table 1 : stocks
 CREATE TABLE stocks (
-    ticker VARCHAR(10) PRIMARY KEY,
-    company_name VARCHAR(255) NOT NULL
+    id SERIAL PRIMARY KEY, 
+    ticker VARCHAR(10) UNIQUE NOT NULL,
+    company_name VARCHAR(255) NOT NULL,
+    sector VARCHAR(100),
+    industry VARCHAR(100),
+    currency VARCHAR(3) NOT NULL CHECK (currency IN ('EUR', 'USD', 'JPY', 'HKD', 'TWD', 'NOK', 'CAD', 'DKK', 'GBP', 'AUD', 'SGD', 'CHF', 'PLN' )),
+    dividend_frequency INTEGER CHECK(dividend_frequency > 0 AND dividend_frequency < 13),
+    last_update_at TIMESTAMP DEFAULT NOW()
 );
 
 
@@ -28,45 +33,40 @@ CREATE TABLE portfolios (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     name VARCHAR(100) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    currency VARCHAR(3) NOT NULL CHECK (currency IN ('EUR', 'USD', 'JPY', 'HKD', 'TWD', 'NOK', 'CAD', 'DKK', 'GBP', 'AUD', 'SGD', 'CHF', 'PLN' )),
+    created_at TIMESTAMP DEFAULT NOW()
 );
 
--- Table 4 : holdings
-CREATE TABLE holdings (
+-- Table 4 : dividend_payments
+CREATE TABLE dividend_payments (
     id SERIAL PRIMARY KEY, 
     portfolio_id INTEGER NOT NULL REFERENCES portfolios(id) ON DELETE CASCADE,
-    ticker VARCHAR(10) NOT NULL REFERENCES stocks(ticker), 
-    total_shares DECIMAL(10, 2) NOT NULL CHECK (total_shares > 0), 
-    avg_price DECIMAL(10, 2) NOT NULL CHECK (avg_price > 0), 
-    date_added TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    stock_id INTEGER NOT NULL REFERENCES stocks(id) ON DELETE CASCADE,
+    amount_per_share DECIMAL(10, 2) NOT NULL,
+    total_amount DECIMAL(10, 2) NOT NULL CHECK (total_amount > 0), 
+    paid_at TIMESTAMP DEFAULT NOW(),
+    ex_dividend_date TIMESTAMP DEFAULT NOW()
 );
 
 -- Table 5 : transactions
 CREATE TABLE transactions (
     id SERIAL PRIMARY KEY,
     portfolio_id INTEGER NOT NULL REFERENCES portfolios(id) ON DELETE CASCADE,
-    ticker VARCHAR(10) NOT NULL REFERENCES stocks(ticker),
+    stock_id INTEGER NOT NULL REFERENCES stocks(id) ON DELETE CASCADE,
     "type" VARCHAR(4) NOT NULL CHECK (type IN ('BUY', 'SELL')),
     quantity DECIMAL(10, 2) NOT NULL CHECK (quantity > 0),
     price DECIMAL(10, 2) NOT NULL CHECK (price > 0),
+    fee DECIMAL(10, 2) NOT NULL CHECK (fee >= 0),
     transaction_date TIMESTAMP DEFAULT NOW()
 );
 
 
 -- Index
 CREATE INDEX idx_portfolio_user ON portfolios(user_id);
-CREATE INDEX idx_holding_portfolio ON holdings(portfolio_id);
+CREATE INDEX idx_transaction_portfolio ON transactions(portfolio_id);
+CREATE INDEX idx_transaction_stock ON transactions(stock_id);
+CREATE INDEX idx_div_payments_portfolio ON dividend_payments(portfolio_id);
+CREATE INDEX idx_div_payments_stock ON dividend_payments(stock_id);
 
 
--- Test data
-INSERT INTO stocks (ticker, company_name) VALUES
-('AAPL', 'Apple Inc.'),
-('MSFT', 'Microsoft Corporation'),
-('JNJ', 'Johnson & Johnson'),
-('KO', 'The Coca-Cola Company');
 
-INSERT INTO users (username, email, password_hash)
-VALUES ('testuser', 'test@test.com', 'temporary_hash_123');
-
-INSERT INTO portfolios (user_id, name)
-VALUES (1, 'My dividend oriented portfolio');
