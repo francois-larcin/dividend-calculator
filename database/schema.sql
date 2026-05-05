@@ -1,4 +1,8 @@
 --                                                DIVIDEND CALCULATOR _ DATABASE SCHEMA
+
+DROP VIEW IF EXISTS current_holdings;
+
+
 DROP TABLE IF EXISTS transactions CASCADE;
 DROP TABLE IF EXISTS dividend_payments CASCADE;
 DROP TABLE IF EXISTS portfolios CASCADE;
@@ -67,6 +71,55 @@ CREATE INDEX idx_transaction_portfolio ON transactions(portfolio_id);
 CREATE INDEX idx_transaction_stock ON transactions(stock_id);
 CREATE INDEX idx_div_payments_portfolio ON dividend_payments(portfolio_id);
 CREATE INDEX idx_div_payments_stock ON dividend_payments(stock_id);
+
+
+
+-- ==========================================
+-- VUE : current_holdings
+-- ==========================================
+
+-- Calculates current portfolio stocks from transactions
+
+CREATE OR REPLACE VIEW current_holdings AS
+SELECT
+    t.portfolio_id,
+    t.stock_id,
+    s.ticker,
+    s.company_name,
+    ROUND(
+    SUM(CASE
+        WHEN t.type = 'BUY' THEN t.quantity
+        WHEN t.type = 'SELL' THEN -t.quantity
+        END), 
+        2) AS total_shares,
+
+    ROUND(
+        SUM(CASE WHEN t.type = 'BUY' THEN t.quantity * t.price ELSE 0 END)
+    /
+    NULLIF(SUM(CASE WHEN t.type = 'BUY' THEN t.quantity ELSE 0 END), 0), 
+        2) 
+    AS avg_price,
+
+    MIN(CASE WHEN t.type = 'BUY' THEN t.transaction_date END) AS date_added,
+
+    ROUND(
+    SUM(CASE WHEN t.type = 'BUY' THEN (t.quantity * t.price) + t.fee ELSE 0 END),
+        2)
+    AS total_invested
+
+FROM transactions t
+JOIN stocks s ON s.id = t.stock_id
+GROUP BY t.portfolio_id, t.stock_id, s.ticker, s.company_name
+HAVING SUM(CASE 
+    WHEN t.type = 'BUY' THEN t.quantity  
+    WHEN t.type = 'SELL' THEN -t.quantity
+END) > 0
+ORDER BY total_invested
+
+
+
+
+
 
 
 
