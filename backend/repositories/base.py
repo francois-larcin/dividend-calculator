@@ -56,7 +56,7 @@ class TransactionRepositoryProtocol(Repository[TransactionData], Protocol):
     
     def get_by_stock(self, stock_id: int) -> list[TransactionData]: ...
  
-#Only inheritates from Protocol ONLY because it's a VIEW, not a TABLE  
+#Inheritates from Protocol ONLY because it's a VIEW, not a TABLE  
 class HoldingRepositoryProtocol(Protocol):
     
     #Specific methods
