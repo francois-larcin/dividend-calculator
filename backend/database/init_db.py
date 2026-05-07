@@ -12,8 +12,8 @@ def init_database():
     conn = psycopg2.connect(
         host="localhost", 
         database="dividend_db",
-        user="postgres" ,
-        password="postgres"
+        user="dividend_user" ,
+        password="dividend123"
     )
     
     cursor = conn.cursor()

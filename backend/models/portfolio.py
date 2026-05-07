@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 import datetime as dt
 
-from holding import HoldingData
+from .holding import HoldingData
 
 
 @dataclass()

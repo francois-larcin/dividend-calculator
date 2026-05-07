@@ -24,3 +24,6 @@ Thumbs.db
 
 # Project specific
 test_setup.py
+
+#Extra explanations
+ARCHITECTURE_COUCHES.md
