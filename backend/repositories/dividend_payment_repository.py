@@ -50,7 +50,7 @@ class DividendPaymentRepository:
             new_id = cursor.fetchone()[0]
             return new_id
 
-        # ==========================================
+    # ==========================================
     # READ
     # ==========================================
     
@@ -132,7 +132,6 @@ class DividendPaymentRepository:
             div_payment: DividendPaymentData instance with updated values
         """
         
-        #TODO 
         query = """
             UPDATE dividend_payments
             SET portfolio_id = %s,
