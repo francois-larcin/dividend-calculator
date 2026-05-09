@@ -3,27 +3,34 @@ DB initialization script
 Executes schema.sql to create tables and insert test data
 """
 import psycopg2
+import os
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 def init_database():
     """Initialize database with schema.sql"""
     print("Initializating database...")
-    
+
     conn = psycopg2.connect(
-        host="localhost", 
+        host="localhost",
         database="dividend_db",
-        user="dividend_user" ,
-        password="dividend123"
+        user="postgres",
+        password="postgres"
     )
-    
+
     cursor = conn.cursor()
-    
-    
-    with open('database/schema.sql', 'r') as f:
+
+    with open(os.path.join(BASE_DIR, 'schema.sql'), 'r') as f:
         sql_content = f.read()
         cursor.execute(sql_content)
         conn.commit()
-        
+
+    with open(os.path.join(BASE_DIR, 'test_data.sql'), 'r') as f:
+        sql_content = f.read()
+        cursor.execute(sql_content)
+        conn.commit()
+
     print("Database initialized successfully!")
     
     cursor.execute("""

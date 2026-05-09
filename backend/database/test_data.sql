@@ -47,12 +47,12 @@ VALUES
 -- ====================================================
 
 -- testuser (id=1)
-INSERT INTO portfolios (user_id, 'name', currency) VALUES
+INSERT INTO portfolios (user_id, name, currency) VALUES
 (1, 'Dividendes Mensuels',    'EUR'),
 (1, 'Croissance Long Terme',  'USD');
 
 -- investor_bob (id=2)
-INSERT INTO portfolios (user_id, 'name', currency) VALUES
+INSERT INTO portfolios (user_id, name, currency) VALUES
 (2, 'Portfolio Retraite',     'GBP');
 
 -- ====================================================

@@ -1,9 +1,6 @@
 -- Active: 1776718233368@@localhost@5432@dividend_db
 --                                                DIVIDEND CALCULATOR _ DATABASE SCHEMA
 
-DROP VIEW IF EXISTS current_holdings;
-
-
 DROP TABLE IF EXISTS transactions CASCADE;
 DROP TABLE IF EXISTS dividend_payments CASCADE;
 DROP TABLE IF EXISTS portfolios CASCADE;
@@ -116,7 +113,15 @@ HAVING SUM(CASE
     WHEN t.type = 'BUY' THEN t.quantity  
     WHEN t.type = 'SELL' THEN -t.quantity
 END) > 0
-ORDER BY total_invested
+ORDER BY total_invested;
+
+
+-- ==========================================
+-- PERMISSIONS
+-- ==========================================
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO dividend_user;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO dividend_user;
 
 
 
