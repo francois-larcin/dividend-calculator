@@ -20,7 +20,7 @@ class DividendPaymentRepository:
     # ==========================================
     
     def add(self, div_payment: DividendPaymentData) -> int:
-        """Insert a new transaction in the transactions TABLE.
+        """Insert a new dividend payment in the transactions TABLE.
         
         Args:
             div_payment: DividendPaymentData instance to insert
@@ -164,7 +164,7 @@ class DividendPaymentRepository:
         Delete a div payment from the DB
         
         Args:
-            div_payment_id: The stock ID to delete
+            div_payment_id: The div payment ID to delete
         """
         
         query = "DELETE FROM dividend_payments WHERE id = %s"
@@ -212,7 +212,40 @@ class DividendPaymentRepository:
                 )
             for row in rows   
             ]
-    
+           
+    def get_by_date_range(self, start_date: dt.datetime, end_date: dt.datetime) -> list[DividendPaymentData]:
+        """
+        Get all the div payments for a period of time
+            
+        Returns:
+            List of DividendPaymentData received between start_date and end_date
+        """
+        
+        query = """
+            SELECT id, portfolio_id, stock_id, amount_per_share, total_amount, paid_at, ex_dividend_date
+            FROM dividend_payments 
+            WHERE paid_at BETWEEN %s AND %s
+            ORDER BY paid_at DESC
+        """
+        
+        with DatabaseConnection(self.db_config) as conn:
+            cursor = conn.cursor()
+            cursor.execute(query, (start_date, end_date, ))
+            rows = cursor.fetchall()
+            
+            return [
+                DividendPaymentData(
+                id=row[0],
+                portfolio_id=row[1],
+                stock_id=row[2],
+                amount_per_share=row[3],
+                total_amount=row[4],
+                paid_at=row[5],
+                ex_dividend_date=row[6]
+                )
+            for row in rows   
+            ]
+        
     def get_by_stock(self, stock_id: int) -> list[DividendPaymentData]:
         """
         Get all the div payments for one specific stock
@@ -248,24 +281,27 @@ class DividendPaymentRepository:
             for row in rows   
             ]
             
-    def get_by_date_range(self, start_date: dt.datetime, end_date: dt.datetime) -> list[DividendPaymentData]:
+            
+    def get_by_portfolio_and_stock(self, portfolio_id: int, stock_id: int) -> list[DividendPaymentData]:
         """
-        Get all the div payments for a period of time
+        Get all the div payments from one stock in one portfolio
+        
+        Args:
+            portfolio_id : the id of the portfolio
+            stock_id: the id of the stock
             
         Returns:
-            List of DividendPaymentData received between start_date and end_date
-        """
-        
+            List od DividentData with that portfolio_id and stock_id"""
+            
         query = """
             SELECT id, portfolio_id, stock_id, amount_per_share, total_amount, paid_at, ex_dividend_date
             FROM dividend_payments 
-            WHERE paid_at BETWEEN %s AND %s
-            ORDER BY paid_at DESC
+            WHERE portfolio_id = %s AND stock_id = %s
         """
         
         with DatabaseConnection(self.db_config) as conn:
             cursor = conn.cursor()
-            cursor.execute(query, (start_date, end_date, ))
+            cursor.execute(query, (portfolio_id, stock_id, ))
             rows = cursor.fetchall()
             
             return [
@@ -280,5 +316,4 @@ class DividendPaymentRepository:
                 )
             for row in rows   
             ]
-        
-    
+            
