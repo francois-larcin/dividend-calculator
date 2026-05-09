@@ -18,11 +18,11 @@ repo = StockRepository(db_config)
 print("=== Test add() ===")
 new_stock = StockData(
     id=0,
-    ticker='AAPL',
-    company_name='Apple Inc.',
-    sector='Technology',
-    industry='Consumer Electronics',
-    currency='USD',
+    ticker='HME',
+    company_name='Hemisphere Energy',
+    sector='Energy',
+    industry='Oil',
+    currency='CAD',
     dividend_frequency=4
 )
 
@@ -36,7 +36,7 @@ print(f"✅ Stock récupéré: {stock}")
 
 # Test get_by_ticker
 print("\n=== Test get_by_ticker() ===")
-stock = repo.get_by_ticker('AAPL')
+stock = repo.get_by_ticker('HME')
 print(f"✅ Stock trouvé: {stock}")
 
 # Test get_all
@@ -46,5 +46,5 @@ print(f"✅ Nombre de stocks: {len(all_stocks)}")
 
 # Test search_by_sector
 print("\n=== Test search_by_sector() ===")
-tech_stocks = repo.search_by_sector('Technology')
-print(f"✅ Stocks Technology: {len(tech_stocks)}")
+tech_stocks = repo.search_by_sector('Energy')
+print(f"✅ Stocks Energy: {len(tech_stocks)}")
