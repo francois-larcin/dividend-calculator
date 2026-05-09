@@ -1,5 +1,5 @@
 from backend.database.connection import DatabaseConnection
-from backend.models import StockData
+from backend.models.stock import StockData
 import datetime as dt
 
 class StockRepository:
