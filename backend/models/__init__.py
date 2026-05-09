@@ -19,7 +19,7 @@ from .holding import HoldingData
 __all__ = [
     'StockData', 
     'TransactionData',
-    'DividendData',
+    'DividendPaymentData',
     'PortfolioData',
     'HoldingData',
 ]
