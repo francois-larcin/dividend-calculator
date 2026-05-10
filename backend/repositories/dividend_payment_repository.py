@@ -291,12 +291,13 @@ class DividendPaymentRepository:
             stock_id: the id of the stock
             
         Returns:
-            List od DividentData with that portfolio_id and stock_id"""
+            List of DividentData with that portfolio_id and stock_id"""
             
         query = """
             SELECT id, portfolio_id, stock_id, amount_per_share, total_amount, paid_at, ex_dividend_date
             FROM dividend_payments 
             WHERE portfolio_id = %s AND stock_id = %s
+            ORDER BY paid_at DESC
         """
         
         with DatabaseConnection(self.db_config) as conn:

@@ -2,7 +2,7 @@ from dataclasses import dataclass
 import datetime as dt
 
 
-@dataclass(frozen=True)
+@dataclass()
 class DividendPaymentData:
     id: int
     portfolio_id: int

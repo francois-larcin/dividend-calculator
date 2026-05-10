@@ -30,14 +30,14 @@ class HoldingData:
     @property
     def cost_without_fees(self) -> float:
         """Returns therorical cost as if there were no transaction fee"""
-        return self.total_shares * self.avg_price
+        return float(self.total_shares * self.avg_price)
     
     
     @property
     def total_fees(self) -> float:
         """Calculate total transaction fee paid"""
     
-        return self.total_invested - self.cost_without_fees
+        return float(self.total_invested - self.cost_without_fees)
     
     
     @property 
@@ -49,7 +49,7 @@ class HoldingData:
         if expected_cost == 0:
             return 0.0
         
-        return (implied_fee / expected_cost) * 100
+        return float((implied_fee / expected_cost) * 100)
     
     # ==========================================
     # VALIDATIONS
@@ -67,12 +67,12 @@ class HoldingData:
     
     def current_value(self, price: float) -> float:
         """Calculate current market value at given price"""
-        return self.total_shares * price
+        return float(self.total_shares * price)
     
     
     def unrealized_gain(self, price: float) -> float:
         """Calculate unrealized P/L (include fees)"""
-        return self.current_value(price) - self.total_invested
+        return float(self.current_value(price) - self.total_invested)
     
     def gain_percentage(self, price: float) -> float:
         """Gain percentage relative to total invested"""

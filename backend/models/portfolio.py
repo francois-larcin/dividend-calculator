@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 import datetime as dt
 
-from .holding import HoldingData
+from backend.models.holding import HoldingData
 
 
 @dataclass()
@@ -31,6 +31,7 @@ class PortfolioData:
     def __len__(self) -> int:
         return len(self.holdings)
     
+    
     def __iter__(self):
         return iter(self.holdings)
     
@@ -38,32 +39,24 @@ class PortfolioData:
     # USEFUL METHODS
     # ==========================================
     
-    def add_holding(self, holding: HoldingData) -> None:
-        """Add an holding (stock) to the portfolio"""
-        self.holdings.append(holding)
-        
-        
     def find_holding_by_ticker(self, ticker: str) -> HoldingData | None:
         """Find a holding via its ticker in THIS portfolio's list"""
-        for holding in self.holdings:
-            if holding.ticker == ticker:
-                return holding
-        return None
-    
-    
-    def remove_holding(self, ticker) -> None:
-        """Remove an holding (stock) from the portfolio"""
-        self.holdings = [h for h in self.holdings if h.ticker != ticker]
+        return next((h for h in self.holdings if h.ticker == ticker), None)
         
-    @property
+        
+    def current_value(self, current_prices: dict[int: float]) -> float:
+        """Calculate current portfolio value at given with market prices"""
+        
+        return float(sum(
+            #current_value = current market value for all shares from 1 stock
+            h.current_value(current_prices.get(h.stock_id, 0))
+            for h in self.holdings
+        ))
+        
+        
     def total_invested(self) -> float:
-        """Total amount invested across all holdings"""
-        return sum(h.total_invested for h in self.holdings)
-    
-    @property
-    def total_shares_count(self) -> int:
-        """Return the number of different stocks within the portfolio"""
-        return len(self.holdings)
+        """Calculate total invested across all holdings"""
+        return float(sum(h.total_invested for h in self.holdings))
         
         
 if __name__ == "__main__":
