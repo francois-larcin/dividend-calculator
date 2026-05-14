@@ -4,13 +4,13 @@ import datetime as dt
 
 @dataclass()
 class DividendPaymentData:
-    id: int
     portfolio_id: int
     stock_id: int 
     amount_per_share: float
     total_amount: float
     paid_at: dt.datetime | None = None
     ex_dividend_date: dt.datetime | None = None
+    id: int | None = None
     
     def __repr__(self) -> str:
         """Dev-friendly representation"""

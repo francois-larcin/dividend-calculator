@@ -22,8 +22,7 @@ class StockService:
         company_name: str,
         sector: str,
         industry: str,
-        currency: str,
-        dividend_frequency: int
+        currency: str
         ) -> int:
         """
         Create a new stock 
@@ -31,13 +30,11 @@ class StockService:
         Simple delegation - just creates the model and calls repository
         """
         stock = StockData(
-            id=0, #TODO to be assigned by DB
-            ticker=ticker,
+            ticker=ticker.upper(),
             company_name=company_name,
             sector=sector,
             industry=industry,
             currency=currency,
-            dividend_frequency=dividend_frequency,
             last_update_at=dt.datetime.now()
         )
         
@@ -67,20 +64,5 @@ class StockService:
     def get_stocks_by_ticker(self, ticker: str) -> StockData | None:
         self.stock_repo.get_by_ticker(ticker)
         
-    # ==========================================
-    # BUSINESS LOGIC - COMPOSITION 
-    # ==========================================
-    
-        #empty
-    
-    # ==========================================
-    # BUSINESS LOGIC - CALCULATION 
-    # ==========================================
-    
-        #empty
         
-    # ==========================================
-    # BUSINESS LOGIC - ORCHESTRATION
-    # ==========================================
-
-        #empty
+        

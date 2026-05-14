@@ -4,14 +4,13 @@ import datetime as dt
 
 @dataclass(frozen=True)
 class StockData:
-    id: int
     ticker: str
     company_name: str
     
     sector: str | None = None
     industry: str | None = None 
-    dividend_frequency: int | None = None 
     last_update_at: dt.datetime | None = None
+    id: int | None = None
     
     currency: str = 'EUR'
     
@@ -27,21 +26,6 @@ class StockData:
             parts.append(f"- {self.sector}")
         return " ".join(parts)
     
-    @property
-    def is_quarterly(self) -> bool:
-        """Check if dividend is paid quarterly"""
-        return self.dividend_frequency == 4
-    
-    @property
-    def is_annual(self) -> bool:
-        """Checks if dividend is paid annually"""
-        return self.dividend_frequency == 1
-    
-    @property
-    def is_biannual(self) -> bool:
-        """Checks if dividend is paid half-yearly"""
-        return self.dividend_frequency == 2
-    
 ######################################      TESTS      ######################################
 
 if __name__ == "__main__":
@@ -55,16 +39,13 @@ if __name__ == "__main__":
         sector='Technology',
         industry='Consumer Electronics',
         currency='USD',
-        dividend_frequency=4,
         last_update_at=dt.datetime.now()
     )
     
     print(f"Test 1 - Stock complet:")
     print(f"  str(): {stock1}")
     print(f"  repr(): {repr(stock1)}")
-    print(f"  Quarterly? {stock1.is_quarterly}")
-    print(f"  Yearly? {stock1.is_annual}")
-    print(f"  Half-yearly? {stock1.is_biannual}")
+    
     
     # Test 2: Stock minimal
     stock2 = StockData(

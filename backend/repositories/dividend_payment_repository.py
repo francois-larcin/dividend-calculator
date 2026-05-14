@@ -193,6 +193,7 @@ class DividendPaymentRepository:
             SELECT id, portfolio_id, stock_id, amount_per_share, total_amount, paid_at, ex_dividend_date
             FROM dividend_payments 
             WHERE portfolio_id = %s
+            ORDER BY paid_at DESC
         """
         
         with DatabaseConnection(self.db_config) as conn:
@@ -261,6 +262,7 @@ class DividendPaymentRepository:
             SELECT id, portfolio_id, stock_id, amount_per_share, total_amount, paid_at, ex_dividend_date
             FROM dividend_payments 
             WHERE stock_id = %s
+            ORDER BY paid_at DESC
         """
         
         with DatabaseConnection(self.db_config) as conn:

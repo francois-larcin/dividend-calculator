@@ -258,6 +258,45 @@ class TransactionRepository:
                 )
             for row in rows   
             ]
+            
+            
+    def get_by_portfolio_and_stock(self, portfolio_id: int, stock_id: int) -> list[TransactionData]:
+        """
+        Get all the transactions for one specific stock in a portfolio
+        
+        Args:
+            stock_id : the id from the stock
+            portfolio_id : the portfolio id to find
+            
+        Returns:
+            List of TransactionData with that stock_id in that portfolio_id
+        """
+        
+        query = """
+            SELECT id, portfolio_id, stock_id, type, quantity, price, fee, transaction_date
+            FROM transactions
+            WHERE portfolio_id = %s AND stock_id = %s
+            ORDER BY transaction_date DESC
+        """
+        
+        with DatabaseConnection(self.db_config) as conn:
+            cursor = conn.cursor()
+            cursor.execute(query, (portfolio_id, stock_id, ))
+            rows = cursor.fetchall()
+            
+            return [
+                TransactionData(
+                id=row[0],
+                portfolio_id=row[1],
+                stock_id=row[2],
+                type=row[3],
+                quantity=row[4],
+                price=row[5],
+                fee=row[6],
+                transaction_date=row[7]
+                )
+            for row in rows   
+            ]
         
         
         

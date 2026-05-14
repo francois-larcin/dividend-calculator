@@ -21,17 +21,17 @@ ALTER SEQUENCE stocks_id_seq RESTART WITH 1;
 -- STOCKS
 -- ====================================================
 
-INSERT INTO stocks (ticker, company_name, currency, sector, industry, dividend_frequency) VALUES
-('AAPL', 'Apple Inc.',                  'USD', 'Technology',        'Consumer Electronics',      4),
-('MSFT', 'Microsoft Corporation',       'USD', 'Technology',        'Software',                  4),
-('JNJ',  'Johnson & Johnson',           'USD', 'Healthcare',        'Pharmaceuticals',           4),
-('KO',   'The Coca-Cola Company',       'USD', 'Consumer Staples',  'Beverages',                 4),
-('PEP',  'PepsiCo Inc.',                'USD', 'Consumer Staples',  'Beverages',                 4),
-('O',    'Realty Income Corporation',   'USD', 'Real Estate',       'REIT',                     12),
-('VISTA',   'Vista Energy', 'USD', 'Energy',     'Oil & Gas',                   4),
-('ASML', 'ASML Holding',                'EUR', 'Technology',        'Semiconductors',            4),
-('NOVO', 'Novo Nordisk',                'DKK', 'Healthcare',        'Pharmaceuticals',           4),
-('SHEL', 'Shell PLC',                   'GBP', 'Energy',            'Oil & Gas',                 4);
+INSERT INTO stocks (ticker, company_name, currency, sector, industry) VALUES
+('AAPL','Apple Inc.', 'USD', 'Technology', 'Consumer Electronics'),
+('MSFT','Microsoft Corporation','USD', 'Technology','Software'),
+('JNJ','Johnson & Johnson','USD', 'Healthcare','Pharmaceuticals'),
+('KO','The Coca-Cola Company','USD', 'Consumer Staples',  'Beverages'),
+('PEP','PepsiCo Inc.','USD', 'Consumer Staples',  'Beverages'),
+('O', 'Realty Income Corporation','USD', 'Real Estate','REIT'),
+('VISTA', 'Vista Energy','USD','Energy', 'Oil & Gas'),
+('ASML','ASML Holding','EUR', 'Technology','Semiconductors'),
+('NOVO', 'Novo Nordisk', 'DKK', 'Healthcare', 'Pharmaceuticals'),
+('SHEL', 'Shell PLC','GBP', 'Energy', 'Oil & Gas');
 
 -- ====================================================
 -- USERS

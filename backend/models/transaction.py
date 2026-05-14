@@ -4,14 +4,15 @@ import datetime as dt
 
 @dataclass(frozen=True)
 class TransactionData:
-    id: int
     portfolio_id: int
     stock_id: int
     type: str # BUY or SELL
     quantity: float
     price: float
     fee: float
+    
     transaction_date: dt.datetime | None = None
+    id: int | None = None
     
     def __repr__(self) -> str:
         """Dev-friendly representation"""

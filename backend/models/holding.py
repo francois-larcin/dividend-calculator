@@ -4,7 +4,6 @@ import datetime as dt
 
 @dataclass(frozen=True)
 class HoldingData:
-    portfolio_id: int
     stock_id: int 
     ticker: str
     company_name: str
@@ -13,6 +12,7 @@ class HoldingData:
     total_invested: float # with fees (comes from DB)
     currency: str = 'EUR'
     date_added: dt.datetime | None = None
+    portfolio_id: int | None = None
     
     def __repr__(self) -> str:
         """Dev-friendly representation"""

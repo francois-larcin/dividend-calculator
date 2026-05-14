@@ -16,7 +16,6 @@ CREATE TABLE stocks (
     sector VARCHAR(100),
     industry VARCHAR(100),
     currency VARCHAR(3) NOT NULL CHECK (currency IN ('EUR', 'USD', 'JPY', 'HKD', 'TWD', 'NOK', 'CAD', 'DKK', 'GBP', 'AUD', 'SGD', 'CHF', 'PLN' )),
-    dividend_frequency INTEGER CHECK(dividend_frequency > 0 AND dividend_frequency < 13),
     last_update_at TIMESTAMP DEFAULT NOW()
 );
 

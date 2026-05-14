@@ -6,11 +6,12 @@ from backend.models.holding import HoldingData
 
 @dataclass()
 class PortfolioData:
-    id: int
     user_id: int
     name: str
-    created_at: dt.datetime | None = None
+    
     currency: str = 'EUR'
+    created_at: dt.datetime | None = None
+    id: int | None = None
     
     #Each instance has its own empty list
     holdings: list[HoldingData] = field(default_factory=list) 

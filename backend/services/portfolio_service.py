@@ -38,7 +38,6 @@ class PortfolioService:
         Simple delegation - just creates the model and calls repository
         """
         portfolio = PortfolioData(
-            id=0, #TODO To be assigned by DB
             user_id=user_id,
             name=name,
             currency=currency,
@@ -172,7 +171,6 @@ class PortfolioService:
         """
         
         transaction = TransactionData(
-            id=0,
             portfolio_id=portfolio_id,
             stock_id= stock_id,
             type= 'BUY',
@@ -196,7 +194,6 @@ class PortfolioService:
         """Sell stock from portfolio by creating a SELL transaction"""
         
         transaction= TransactionData(
-            id=0,
             portfolio_id=portfolio_id,
             stock_id= stock_id,
             type= 'BUY',
