@@ -35,9 +35,7 @@ def map_yfinance_to_stock(ticker: str, yf_info: dict) -> StockData:
         last_update_at=dt.datetime.now()
     )
     
-
-
-
+    
 class TransactionService:
     def __init__(
         self, 
@@ -55,27 +53,19 @@ class TransactionService:
     # SIMPLE DELEGATION (just pass to repository)
     # ========================================== 
     
-    def create_transaction(
-        self,
-        portfolio_id: int,
-        stock_id: int,
-        type: str,
-        quantity: float,
-        price: float,
-        fee: float
-        ) -> int:
-        """Create a new transaction"""
-     
-        transaction = TransactionData(
-         portfolio_id=portfolio_id,
-         stock_id=stock_id,
-         type=type,
-         quantity=quantity,
-         price=price,
-         fee=fee,
-         transaction_date=dt.datetime.now()
-        )
+    def create_transaction(self, transaction: TransactionData) -> int:
+        """
+        Create transaction directly.
         
+        Simple delegation to repository.
+        For testing or special cases - normally use buy_stock() or sell_stock().
+        
+        Args:
+            transaction: TransactionData instance
+        
+        Returns:
+            Transaction ID
+        """
         return self.transaction_repo.add(transaction)
     
     def get_transaction(self, transaction_id: int) -> TransactionData | None:
@@ -153,7 +143,7 @@ class TransactionService:
         
         #2. Verify portfolio exists
         portfolio = self.portfolio_repo.get_by_id(portfolio_id)
-        if not portfolio:
+        if portfolio is None:
             raise ValueError(f"Portfolio {portfolio_id} not found")
         
         #3. Get or create stock
@@ -230,7 +220,7 @@ class TransactionService:
         
         if holding.total_shares < quantity:
             raise ValueError(
-                f"Insuficient shares. "
+                f"Insufficient shares. "
                 f"Have {holding.total_shares}, trying to sell {quantity}"
             )
         

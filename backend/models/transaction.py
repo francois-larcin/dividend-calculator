@@ -9,8 +9,8 @@ class TransactionData:
     type: str # BUY or SELL
     quantity: float
     price: float
-    fee: float
     
+    fee: float = 0.0
     transaction_date: dt.datetime | None = None
     id: int | None = None
     

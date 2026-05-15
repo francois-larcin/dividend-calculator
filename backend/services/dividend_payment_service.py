@@ -46,7 +46,6 @@ class DividendPaymentService:
         """
         
         dividend_payment = DividendPaymentData(
-            id=0, #TODO to be assigned by DB
             portfolio_id=portfolio_id,
             stock_id=stock_id,
             amount_per_share=amount_per_share,

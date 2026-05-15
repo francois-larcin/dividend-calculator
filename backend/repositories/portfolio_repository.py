@@ -162,7 +162,7 @@ class PortfolioRepository:
         
         with DatabaseConnection(self.db_config) as conn:
             cursor = conn.cursor()
-            cursor.execute(query, (portfolio_id,))
+            cursor.execute(query, (portfolio_id, ))
             
     # ==========================================
     # SPECIFIC METHODS

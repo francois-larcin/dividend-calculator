@@ -29,10 +29,9 @@ class StockRepository:
             
         query = """
             INSERT INTO stocks (
-                ticker, company_name, sector, industry, currency,
-                dividend_frequency, last_update_at
+                ticker, company_name, sector, industry, currency, last_update_at
             )
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s)
             RETURNING id
         """
         
@@ -44,7 +43,6 @@ class StockRepository:
                 stock.sector,
                 stock.industry,
                 stock.currency,
-                stock.dividend_frequency,
                 stock.last_update_at or dt.datetime.now()
             ))
             
@@ -68,14 +66,14 @@ class StockRepository:
         
         query = """
             SELECT id, ticker, company_name, sector, industry, 
-                   currency, dividend_frequency, last_update_at
+                   currency, last_update_at
             FROM stocks
             WHERE id = %s
         """
         
         with DatabaseConnection(self.db_config) as conn:
             cursor = conn.cursor()
-            cursor.execute(query, (stock_id,))
+            cursor.execute(query, (stock_id, ))
             row = cursor.fetchone()
             
             if not row:
@@ -88,8 +86,7 @@ class StockRepository:
                 sector=row[3],
                 industry=row[4],
                 currency=row[5],
-                dividend_frequency=row[6],
-                last_update_at=row[7]
+                last_update_at=row[6]
             )
     
     
@@ -102,7 +99,7 @@ class StockRepository:
         """
         
         query = """
-            SELECT id, ticker, company_name, sector, industry, currency, dividend_frequency, last_update_at
+            SELECT id, ticker, company_name, sector, industry, currency, last_update_at
             FROM stocks
         """
         
@@ -119,8 +116,7 @@ class StockRepository:
                 sector=row[3],
                 industry=row[4],
                 currency=row[5],
-                dividend_frequency=row[6],
-                last_update_at=row[7]
+                last_update_at=row[6]
             )
             for row in rows
             ]
@@ -143,7 +139,6 @@ class StockRepository:
             sector = %s,
             industry = %s,
             currency = %s,
-            dividend_frequency = %s,
             last_update_at = %s
             WHERE id = %s
         """
@@ -156,7 +151,6 @@ class StockRepository:
                 stock.sector,
                 stock.industry,
                 stock.currency,
-                stock.dividend_frequency,
                 stock.last_update_at or dt.datetime.now(),
                 stock.id
             ))
@@ -177,7 +171,7 @@ class StockRepository:
         
         with DatabaseConnection(self.db_config) as conn:
             cursor = conn.cursor()
-            cursor.execute(query, (stock_id,))
+            cursor.execute(query, (stock_id, ))
             
     # ==========================================
     # SPECIFIC METHODS
@@ -197,7 +191,7 @@ class StockRepository:
 
         query= """
         
-            SELECT id, ticker, company_name, sector, industry, currency, dividend_frequency, last_update_at
+            SELECT id, ticker, company_name, sector, industry, currency, last_update_at
             FROM stocks
             WHERE sector = %s
             
@@ -216,8 +210,7 @@ class StockRepository:
                 sector=row[3],
                 industry=row[4],
                 currency=row[5],
-                dividend_frequency=row[6],
-                last_update_at=row[7]
+                last_update_at=row[6]
                 )
             for row in rows
             ]
@@ -236,14 +229,14 @@ class StockRepository:
         
         query = """
             SELECT id, ticker, company_name, sector, industry, 
-                   currency, dividend_frequency, last_update_at
+                   currency, last_update_at
             FROM stocks
             WHERE ticker = %s
         """
         
         with DatabaseConnection(self.db_config) as conn:
             cursor = conn.cursor()
-            cursor.execute(query, (ticker,))
+            cursor.execute(query, (ticker, ))
             row = cursor.fetchone()
             
             if not row:
@@ -256,7 +249,6 @@ class StockRepository:
                 sector=row[3],
                 industry=row[4],
                 currency=row[5],
-                dividend_frequency=row[6],
-                last_update_at=row[7]
+                last_update_at=row[6]
             )
     

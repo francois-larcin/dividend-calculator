@@ -138,8 +138,6 @@ class TransactionRepository:
         Args:
             transaction: transactionData instance with updated values
         """
-        
-        #TODO 
         query = """
             UPDATE transactions
             SET portfolio_id = %s,
@@ -181,7 +179,7 @@ class TransactionRepository:
         
         with DatabaseConnection(self.db_config) as conn:
             cursor = conn.cursor()
-            cursor.execute(query, (t_id,))
+            cursor.execute(query, (t_id, ))
             
     # ==========================================
     # SPECIFIC METHODS

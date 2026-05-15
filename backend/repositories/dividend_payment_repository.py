@@ -171,7 +171,7 @@ class DividendPaymentRepository:
         
         with DatabaseConnection(self.db_config) as conn:
             cursor = conn.cursor()
-            cursor.execute(query, (div_payment_id,))
+            cursor.execute(query, (div_payment_id, ))
     
     
     # ==========================================
