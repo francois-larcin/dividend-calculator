@@ -34,7 +34,7 @@ class HoldingRepository:
         """
         
         query = """
-            SELECT portfolio_id, stock_id, ticker, company_name, total_shares, currency, avg_price, date_added, total_invested
+            SELECT portfolio_id, stock_id, ticker, company_name, currency, total_shares, avg_price, date_added, total_invested
             FROM current_holdings
             WHERE portfolio_id = %s
         """
@@ -50,11 +50,11 @@ class HoldingRepository:
                 stock_id=row[1],
                 ticker=row[2],
                 company_name=row[3],
-                total_shares=float(row[4]) if row[4] is not None else 0.0,
-                currency=float(row[4]) if row[5] is not None else 0.0,
-                avg_price=float(row[4]) if row[6] is not None else 0.0,
+                currency=row[4],
+                total_shares=float(row[5]) if row[5] is not None else 0.0,
+                avg_price=float(row[6]) if row[6] is not None else 0.0,
                 date_added=row[7],
-                total_invested=float(row[4]) if row[8] is not None else 0.0,
+                total_invested=float(row[8]) if row[8] is not None else 0.0,
                 )
             for row in rows   
             ]
@@ -73,7 +73,7 @@ class HoldingRepository:
         """
         
         query = """
-            SELECT portfolio_id, stock_id, ticker, company_name, total_shares, currency, avg_price, date_added, total_invested
+            SELECT portfolio_id, stock_id, ticker, company_name, currency, total_shares, avg_price, date_added, total_invested
             FROM current_holdings
             WHERE portfolio_id = %s AND stock_id = %s
         """
@@ -91,11 +91,11 @@ class HoldingRepository:
                 stock_id=row[1],
                 ticker=row[2],
                 company_name=row[3],
-                total_shares=float(row[4]) if row[4] is not None else 0.0,
-                currency=float(row[4]) if row[5] is not None else 0.0,
-                avg_price=float(row[4]) if row[6] is not None else 0.0,
+                currency=row[4],
+                total_shares=float(row[5]) if row[5] is not None else 0.0,
+                avg_price=float(row[6]) if row[6] is not None else 0.0,
                 date_added=row[7],
-                total_invested=float(row[4]) if row[8] is not None else 0.0,
+                total_invested=float(row[8]) if row[8] is not None else 0.0,
                 )
             
     

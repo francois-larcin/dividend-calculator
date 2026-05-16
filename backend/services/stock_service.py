@@ -62,7 +62,7 @@ class StockService:
         
     
     def get_stocks_by_ticker(self, ticker: str) -> StockData | None:
-        self.stock_repo.get_by_ticker(ticker)
+        return self.stock_repo.get_by_ticker(ticker)
         
         
         
