@@ -7,6 +7,8 @@ Endpoints:
     GET    /api/portfolios/             → Get all portfolios
     GET    /api/portfolios/<id>         → Get portfolio by ID
     GET    /api/portfolios/<id>/holdings → Get portfolio with holdings
+    GET    /api/portfolios/<id>/value   → Get portfolio total value
+    GET    /api/portfolios/<id>/gain   → Get portfolio total gain
     POST   /api/portfolios/             → Create portfolio
     PUT    /api/portfolios/<id>         → Update portfolio
     DELETE /api/portfolios/<id>         → Delete portfolio

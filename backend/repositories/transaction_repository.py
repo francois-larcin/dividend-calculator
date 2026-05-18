@@ -220,6 +220,7 @@ class TransactionRepository:
                 )
             for row in rows   
             ]
+      
         
     def get_by_stock(self, stock_id: int) -> list[TransactionData]:
         """

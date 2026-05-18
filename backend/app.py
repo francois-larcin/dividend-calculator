@@ -15,10 +15,21 @@ from backend.repositories import (
     DividendPaymentRepository
 )
 
-from backend.services.portfolio_service import PortfolioService
-from backend.routes import portfolio_bp
-import backend.routes.portfolio_routes as portfolio_routes
+from backend.services import (
+    TransactionService, 
+    PortfolioService,
+    HoldingService,
+    StockService,
+    DividendPaymentService
+)
 
+
+from backend.routes import (
+    portfolio_bp,
+    transaction_bp,
+    portfolio_routes,
+    transaction_routes 
+)
 
 # ==========================================
 # CONFIGURATION
@@ -49,6 +60,8 @@ def create_app() -> Flask:
     portfolio_repo = PortfolioRepository(db_config)
     holding_repo = HoldingRepository(db_config)
     transaction_repo = TransactionRepository(db_config)
+    stock_repo = StockRepository(db_config)
+    dividend_payment_repo = DividendPaymentRepository(db_config)
     
     #Create services (Dependency Injection)
     portfolio_service = PortfolioService(
@@ -57,11 +70,21 @@ def create_app() -> Flask:
         transaction_repo=transaction_repo
     )
     
+    transaction_service = TransactionService(
+        portfolio_repo = portfolio_repo,
+        transaction_repo=transaction_repo,
+        stock_repo=stock_repo,
+        holding_repo=holding_repo,
+    )
+    
     #Inject service into routes
     portfolio_routes.portfolio_service = portfolio_service
+    transaction_routes.transaction_service = transaction_service
+    
     
     #Register blueprints (URL prefixes)
     app.register_blueprint(portfolio_bp, url_prefix='/api/portfolios')
+    app.register_blueprint(transaction_bp, url_prefix='/api/transactions')
     
     return app
 
