@@ -10,6 +10,7 @@ from backend.repositories import (
 )
 import datetime as dt
 
+VALID_CURRENCIES = ['EUR', 'USD', 'JPY', 'HKD', 'TWD', 'NOK', 'CAD', 'DKK', 'GBP', 'AUD', 'SGD', 'CHF', 'PLN']
 
 class PortfolioService:
     def __init__(
@@ -37,6 +38,10 @@ class PortfolioService:
         
         Simple delegation - just creates the model and calls repository
         """
+        if portfolio.currency not in VALID_CURRENCIES:
+            raise ValueError(f"Invalid currency: {portfolio.currency}")
+        
+        
         portfolio = PortfolioData(
             user_id=user_id,
             name=name,
@@ -55,6 +60,8 @@ class PortfolioService:
     
     
     def update_portfolio(self, portfolio: PortfolioData) -> None:
+        if portfolio.currency not in VALID_CURRENCIES:
+            raise ValueError(f"Invalid currency: {portfolio.currency}")
         self.portfolio_repo.update(portfolio)
         
     def delete_portfolio(self, portfolio_id: int) -> None:
@@ -122,6 +129,8 @@ class PortfolioService:
             
         return total_value
     
+    
+    
     def calculate_portfolio_gain(
         self, 
         portfolio_id: int,
@@ -150,61 +159,7 @@ class PortfolioService:
             'gain_percent': gain_percent
         }
         
-        
-    # ==========================================
-    # BUSINESS LOGIC - ORCHESTRATION
-    # ==========================================
-    
-    def buy_stock(
-        self,
-        portfolio_id: int,
-        stock_id: int, 
-        quantity: float,
-        price: float,
-        fee: float = 0.0
-    ) -> int:
-        """
-        Add stock to portfolio by creating a BUY transaction
-        
-        Uses transaction_repo to create transaction.
-        The holding is automatically updated via the current_holdings VIEW
-        """
-        
-        transaction = TransactionData(
-            portfolio_id=portfolio_id,
-            stock_id= stock_id,
-            type= 'BUY',
-            quantity=quantity,
-            price=price,
-            fee=fee,
-            transaction_date=dt.datetime.now()
-        )
-        
-        return self.transaction_repo.add(transaction)
-    
-    
-    def sell_stock(
-        self,
-        portfolio_id: int,
-        stock_id: int,
-        quantity: float,
-        price: float,
-        fee: float = 0.0
-    ) -> int:
-        """Sell stock from portfolio by creating a SELL transaction"""
-        
-        transaction= TransactionData(
-            portfolio_id=portfolio_id,
-            stock_id= stock_id,
-            type= 'BUY',
-            quantity=quantity,
-            price=price,
-            fee=fee,
-            transaction_date=dt.datetime.now()
-        )
-        
-        return self.transaction_repo.add(transaction)
-    
+
     # ==========================================
     # TESTS
     # ==========================================

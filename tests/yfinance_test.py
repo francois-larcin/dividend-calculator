@@ -1,7 +1,8 @@
 import yfinance as yf
 
-aapl = yf.Ticker("MSFT")
+msft = yf.Ticker("MELI")
 
-info = aapl.info
+info = msft.info
 
-print(info.dividends.tail(10))
+print(info.get('currentPrice'))
+print(info.get('recommendationKey'))
