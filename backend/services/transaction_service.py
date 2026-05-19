@@ -80,7 +80,7 @@ class TransactionService:
         
     
     def delete_transaction(self, transaction_id) -> None:
-        self.stock_repo.delete(transaction_id)
+        self.transaction_repo.delete(transaction_id)
     
     
     def get_portfolio_transactions(self, portfolio_id: int) -> list[TransactionData]:
