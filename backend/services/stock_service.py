@@ -1,3 +1,5 @@
+from dataclasses import asdict
+
 from backend.models import (
     StockData
 )
@@ -7,6 +9,8 @@ from backend.repositories import (
 )
 
 import datetime as dt
+import yfinance as yf
+import requests
 
 class StockService:
     def __init__(self, stock_repo: StockRepository):
@@ -63,6 +67,74 @@ class StockService:
     
     def get_stocks_by_ticker(self, ticker: str) -> StockData | None:
         return self.stock_repo.get_by_ticker(ticker)
+    
+    def refresh_from_yfinance(self, stock_id: int) -> StockData | None: 
+        
+        #1. Check that stock exists
+        stock = self.stock_repo.get_by_id(stock_id)
+        if stock is None:
+            return None
+        
+        #2. Fetch new data 
         
         
+    
+    
+    #full live search
+    def search_stocks(self, query: str) -> list[dict]:
+        """Search in DB first, then yfinance if not found"""
+        # 1. Search in DB
+        local = self.stock_repo.search_by_name(query)
+        local_dicts = [
+                {
+                    'ticker': s.ticker,
+                    'company_name': s.company_name,
+                }
+                for s in local
+        ]
+        
+        # Ticker already found in DB
+        local_tickers = {s.ticker for s in local}
+        
+        # 2. Search in yfinance
+        yf_results = self._search_yfinance(query)
+        
+            
+        # 3. Combine both searches without doubled results
+        yf_filtered = [
+            r for r in yf_results
+            if r.get('ticker') not in local_tickers
+        ]
+        
+        return (local_dicts + yf_filtered)
+    
+
+    # ==========================================
+    # HELPER private
+    # ==========================================
+    
+    def _search_yfinance(self, query: str) -> list[dict]:
+        """
+        Search stocks via yfinance
+        
+        Private helper method
+        
+        Returns:
+            List of dicts with ticker and company_name
+        """
+        
+        try:
+            results = yf.Search(query).quotes
+            
+            return [
+                {
+                    'ticker': r.get('symbol'),
+                    'company_name': r.get('longname') or r.get('shortname'),
+                }
+                for r in results[:10]
+            ]
+        #Several types of possible exception
+        except requests.exceptions.RequestException:
+            return []
+         
         

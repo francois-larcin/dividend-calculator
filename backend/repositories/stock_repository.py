@@ -121,6 +121,40 @@ class StockRepository:
             for row in rows
             ]
         
+        
+    def search_by_name(self, query: str) -> list[StockData]:
+        """Search stocks by ticker OR company name (partial match)"""
+        
+        query_sql = """
+            SELECT id, ticker, company_name, sector, industry, 
+               currency, last_update_at
+            FROM stocks
+            WHERE LOWER(ticker) LIKE LOWER(%s)
+            OR LOWER(company_name) LIKE LOWER(%s)
+        """
+        
+        search_term = f"%{query}%"
+        
+        with DatabaseConnection(self.db_config) as conn:
+            cursor = conn.cursor()
+            cursor.execute(query_sql, (search_term, search_term))
+            rows = cursor.fetchall()
+            
+            return [
+                StockData(
+                id=row[0],
+                ticker=row[1],
+                company_name=row[2],
+                sector=row[3],
+                industry=row[4],
+                currency=row[5],
+                last_update_at=row[6]
+            )
+            for row in rows
+            ]
+        
+        
+        
     # ==========================================
     # UPDATE
     # ==========================================
