@@ -265,7 +265,7 @@ class StockRepository:
             SELECT id, ticker, company_name, sector, industry, 
                    currency, last_update_at
             FROM stocks
-            WHERE ticker = %s
+            WHERE UPPER(ticker) = UPPER(%s)
         """
         
         with DatabaseConnection(self.db_config) as conn:

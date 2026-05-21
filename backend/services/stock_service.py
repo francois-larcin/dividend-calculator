@@ -1,4 +1,5 @@
 from dataclasses import asdict
+from venv import logger
 
 from backend.models import (
     StockData
@@ -68,7 +69,14 @@ class StockService:
     def get_stocks_by_ticker(self, ticker: str) -> StockData | None:
         return self.stock_repo.get_by_ticker(ticker)
     
-    def refresh_from_yfinance(self, stock_id: int) -> StockData | None: 
+    
+    def refresh_one_stock(self, stock_id: int) -> StockData | None: 
+        """
+        Refresh one stock from yfinance
+        
+        Returns:
+            The refreshed stock
+        """
         
         #1. Check that stock exists
         stock = self.stock_repo.get_by_id(stock_id)
@@ -76,10 +84,44 @@ class StockService:
             return None
         
         #2. Fetch new data 
+        yf_stock = yf.Ticker(stock.ticker)
+        info = yf_stock.info
         
+        #3. Update object with new data
+        stock.company_name = info.get('longName', stock.company_name)
+        stock.sector = info.get('sector', stock.sector)
+        stock.industry = info.get('industry', stock.industry)
+        stock.currency = info.get('currency', stock.currency)
+        stock.last_update_at = dt.datetime.now()
         
+        #4. Save via existing update() method
+        self.stock_repo.update(stock)
+        
+        return stock
     
     
+    def refresh_all_stocks(self) -> int:
+        """
+        Refresh all stocks from yfinance
+        
+        Returns:
+            Number of stocks refreshed
+        """
+        
+        stocks = self.stock_repo.get_all()
+        
+        refreshed = 0
+        for stock in stocks:
+            try:
+                self.refresh_one_stock(stock.id)
+                refreshed += 1
+            except ValueError as e:
+                logger.warning(f"Failed to refresh {stock.ticker} : {e}")
+                pass # go on to next stock
+            
+        return refreshed
+        
+
     #full live search
     def search_stocks(self, query: str) -> list[dict]:
         """Search in DB first, then yfinance if not found"""
@@ -108,7 +150,6 @@ class StockService:
         
         return (local_dicts + yf_filtered)
     
-
     # ==========================================
     # HELPER private
     # ==========================================
