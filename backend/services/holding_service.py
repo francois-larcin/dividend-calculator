@@ -83,7 +83,7 @@ class HoldingService:
             for currency, value in by_currency.items()
         }
         
-    def get_holding_dividends(
+    def get_holding_dividend_history(
         self,
         portfolio_id: int,
         stock_id: int,
@@ -105,7 +105,11 @@ class HoldingService:
         }
         
     def get_holding_dividend_ratio_to_portfolio(self, portfolio_id: int) -> dict[str, float]:
-        """For each holding of a porytfolio, calculate holding total dividend received to portfolio total dividend"""
+        """
+        For each holding of a portfolio, calculate holding total dividend received to portfolio total dividend
+        
+        Ex : this holding got me 13% of all my dividends for this portfolio
+        """
         
         holdings = self.holding_repo.get_by_portfolio(portfolio_id)
         
