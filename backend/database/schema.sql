@@ -45,8 +45,8 @@ CREATE TABLE dividend_payments (
     stock_id INTEGER NOT NULL REFERENCES stocks(id) ON DELETE CASCADE,
     amount_per_share DECIMAL(10, 2) NOT NULL,
     total_amount DECIMAL(10, 2) NOT NULL CHECK (total_amount > 0), 
-    paid_at TIMESTAMP DEFAULT NOW(),
-    ex_dividend_date TIMESTAMP DEFAULT NOW()
+    paid_at DATE DEFAULT CURRENT_DATE,
+    ex_dividend_date DATE DEFAULT CURRENT_DATE
 );
 
 -- Table 5 : transactions

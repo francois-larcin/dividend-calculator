@@ -61,10 +61,10 @@ INSERT INTO portfolios (user_id, name, currency) VALUES
 
 INSERT INTO transactions (portfolio_id, stock_id, type, quantity, price, fee, transaction_date) VALUES
 -- Portfolio 1 — Dividendes Mensuels
-(1, 1,  'BUY', 10.00, 150.00, 1.50, '2024-01-15 10:30:00'),
-(1, 4,  'BUY', 15.00,  54.00, 1.00, '2024-01-20 09:15:00'),
-(1, 4,  'BUY',  5.00,  58.00, 1.00, '2024-03-05 11:45:00'),
-(1, 6,  'BUY', 30.00,  62.00, 0.00, '2024-02-01 08:00:00'),
+(1, 1,  'BUY', 10.00, 150.00, 1.50, '2024-01-15 12:00:00'),
+(1, 4,  'BUY', 15.00,  54.00, 1.00, '2024-01-20 09:00:00'),
+(1, 4,  'BUY',  5.00,  58.00, 1.00, '2024-03-05 03:00:00'),
+(1, 6,  'BUY', 30.00,  62.00, 0.00, '2024-02-01 05:00:00'),
 
 -- Portfolio 2 — Croissance Long Terme
 (2, 2,  'BUY',  5.00, 300.00, 1.50, '2024-02-10 14:20:00'),
