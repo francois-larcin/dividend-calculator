@@ -8,8 +8,8 @@ class DividendPaymentData:
     stock_id: int 
     amount_per_share: float
     total_amount: float
-    paid_at: dt.datetime | None = None
-    ex_dividend_date: dt.datetime | None = None
+    paid_at: dt.date | None = None
+    ex_dividend_date: dt.date | None = None
     id: int | None = None
     
     def __repr__(self) -> str:

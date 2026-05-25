@@ -29,10 +29,13 @@ from backend.routes import (
     transaction_bp,
     stock_bp,
     holding_bp,
+    div_payment_bp,
+    
     portfolio_routes,
     transaction_routes,
     stock_routes,
-    holding_routes
+    holding_routes,
+    dividend_payment_routes
 )
 
 # ==========================================
@@ -91,12 +94,21 @@ def create_app() -> Flask:
         div_payment_repo=div_payment_repo
     )
     
+    div_payment_service = DividendPaymentService(
+        div_payment_repo=div_payment_repo,
+        stock_repo=stock_repo,
+        portfolio_repo=portfolio_repo,
+        holding_repo=holding_repo,
+        portfolio_service=portfolio_service
+    )
+    
     #Inject service into routes
     portfolio_routes.portfolio_service = portfolio_service
     transaction_routes.transaction_service = transaction_service
     stock_routes.stock_service = stock_service
     holding_routes.holding_service = holding_service
     holding_routes.portfolio_service = portfolio_service
+    dividend_payment_routes.div_payment_service = div_payment_service
     
     
     #Register blueprints (URL prefixes)
@@ -104,6 +116,7 @@ def create_app() -> Flask:
     app.register_blueprint(transaction_bp, url_prefix='/api/transactions')
     app.register_blueprint(stock_bp, url_prefix='/api/stocks')
     app.register_blueprint(holding_bp, url_prefix='/api/holdings')
+    app.register_blueprint(div_payment_bp, url_prefix='/api/dividends')
     
     return app
 

@@ -53,7 +53,7 @@ def get_transaction(transaction_id: int):
     return jsonify(asdict(transaction)), 200
 
 
-@transaction_bp.route('/portfolio/<portfolio_id>', methods=['GET'])
+@transaction_bp.route('/portfolio/<int:portfolio_id>', methods=['GET'])
 def get_portfolio_transactions(portfolio_id: int):
     """
     GET /api/transactions/portfolio/<portfolio_id> 
@@ -89,7 +89,7 @@ def get_stock_transactions(stock_id: int):
     return jsonify([asdict(t) for t in transactions]), 200
 
  
-@transaction_bp.route('portfolio/<int:portfolio_id>/stock/<int:stock_id>', methods=['GET'])
+@transaction_bp.route('/portfolio/<int:portfolio_id>/stock/<int:stock_id>', methods=['GET'])
 def get_portfolio_stock_transaction(portfolio_id: int, stock_id: int):
     """
     GET /api/transactions/portfolio/<portfolio_id>/stock/<stock_id>

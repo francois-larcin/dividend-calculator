@@ -20,7 +20,7 @@ class DividendPaymentRepository:
     # ==========================================
     
     def add(self, div_payment: DividendPaymentData) -> int:
-        """Insert a new dividend payment in the transactions TABLE.
+        """Insert a new dividend payment in the dividend payment TABLE.
         
         Args:
             div_payment: DividendPaymentData instance to insert
@@ -282,8 +282,7 @@ class DividendPaymentRepository:
                 )
             for row in rows   
             ]
-            
-            
+                 
     def get_by_portfolio_and_stock(self, portfolio_id: int, stock_id: int) -> list[DividendPaymentData]:
         """
         Get all the div payments from one stock in one portfolio
@@ -319,4 +318,7 @@ class DividendPaymentRepository:
                 )
             for row in rows   
             ]
-            
+    
+    
+    
+        
