@@ -50,9 +50,9 @@ class DividendPaymentService:
     def get_by_stock(self, stock_id: int) -> list[DividendPaymentData]:
         return self.div_payment_repo.get_by_stock(stock_id)
     
-    #TODO to be applied for a single portfolio
-    def get_by_date_range(self, start_date: dt.datetime, end_date: dt.datetime) -> list[DividendPaymentData]:
-        return self.div_payment_repo.get_by_date_range(start_date, end_date)
+    
+    def get_by_portfolio_and_date_range(self, portfolio_id: int, start_date: dt.date, end_date: dt.date) -> list[DividendPaymentData]:
+        return self.div_payment_repo.get_by_portfolio_and_date_range(portfolio_id, start_date, end_date)
             
     def delete_div_payment(self, div_payment_id: int) -> None:
         self.div_payment_repo.delete(div_payment_id)

@@ -214,9 +214,9 @@ class DividendPaymentRepository:
             for row in rows   
             ]
            
-    def get_by_date_range(self, start_date: dt.datetime, end_date: dt.datetime) -> list[DividendPaymentData]:
+    def get_by_portfolio_and_date_range(self, portfolio_id: int, start_date: dt.date, end_date: dt.date) -> list[DividendPaymentData]:
         """
-        Get all the div payments for a period of time
+        Get all the div payments for a period of time for a specific portfolio
             
         Returns:
             List of DividendPaymentData received between start_date and end_date
@@ -225,13 +225,14 @@ class DividendPaymentRepository:
         query = """
             SELECT id, portfolio_id, stock_id, amount_per_share, total_amount, paid_at, ex_dividend_date
             FROM dividend_payments 
-            WHERE paid_at BETWEEN %s AND %s
+            WHERE portfolio_id = %s 
+            AND paid_at BETWEEN %s AND %s 
             ORDER BY paid_at DESC
         """
         
         with DatabaseConnection(self.db_config) as conn:
             cursor = conn.cursor()
-            cursor.execute(query, (start_date, end_date, ))
+            cursor.execute(query, (portfolio_id, start_date, end_date, ))
             rows = cursor.fetchall()
             
             return [

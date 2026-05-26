@@ -10,7 +10,9 @@ Endpoints:
     GET    /api/dividends/<portfolio_id>/yield       → Get portfolio yield
     
     
-    GET    /api/dividends/<portfolio_id>/<stock_id>  → Get all div_payment for a stock in a portfolio  
+    GET    /api/dividends/<portfolio_id>/<stock_id>  → Get all div_payment for a stock in a portfolio
+    GET    /api/dividends/<portfolio_id>/<stock_id>/yield → Get a stock yield
+    GET    /api/dividends/<portfolio_id>/date-range?start=...&end=... → Get portfolio div payments for a specific time range
     
     
     POST   /api/dividends/sync/<portfolio_id>        → Create buy transaction
@@ -27,6 +29,8 @@ from backend.services import (
 div_payment_bp = Blueprint('dividend_payment', __name__)
 
 div_payment_service: DividendPaymentService = None
+
+import datetime as dt
 
 # ==========================================
 # READ
@@ -98,6 +102,33 @@ def get_portfolio_dividend_stock(portfolio_id: int, stock_id: int):
     return jsonify([asdict(d) for d in dividend_payments]), 200
 
 
+@div_payment_bp.route('<portfolio_id>/date-range', methods=['GET'])
+def get_by_date_range(portfolio_id: int):
+    """
+    GET /api/dividends/<portfolio_id>/date-range?start=...&end=...
+    
+    Returns portfolio div payments for a period of time
+    
+    Response 200: [
+        {"portfolio_id": 1, "stock_id": 2, "amount_per_share": 3.45},
+        {"portfolio_id": 1, "stock_id": 3, "amount_per_share": 18.89}, ...
+    ]
+    """
+    start = request.args.get("start") #2024-03-27
+    end = request.args.get("end") #2024-12-31
+    
+    if not start or not end:
+        return jsonify({"error": "Missing required params: start, end"}), 400
+    
+    #Convert string -> date
+    start_date = dt.date.fromisoformat(start)
+    end_date = dt.date.fromisoformat(end)
+    
+    payments = div_payment_service.get_by_portfolio_and_date_range(portfolio_id, start_date, end_date)
+    
+    return jsonify([asdict(d) for d in payments]), 200
+
+
 # ==========================================
 # CREATE
 # ==========================================
@@ -117,10 +148,7 @@ def sync_dividends(portfolio_id: int):
     
     return jsonify({'number or new div payments inserted': nb_new_div_payments}), 200
     
-
-
-
-    
+   
 # ==========================================
 # UPDATE
 # ==========================================
