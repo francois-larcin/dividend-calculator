@@ -5,7 +5,7 @@ Flask Application
 Main entry point. Creates app, initializes services, registers routes.
 """
 
-from flask import Flask
+from flask import Flask, render_template
 
 from backend.repositories import (
     PortfolioRepository,
@@ -61,7 +61,16 @@ def create_app() -> Flask:
         Configured Flask app
     """
     
-    app = Flask(__name__)
+    app = Flask(
+        __name__,
+        template_folder='../frontend/templates',
+        static_folder='../frontend/static'
+        )
+    
+    #Main road
+    @app.route('/')
+    def index():
+        return render_template('dashboard.html')
     
     #Create repositories
     portfolio_repo = PortfolioRepository(db_config)

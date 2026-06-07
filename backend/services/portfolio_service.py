@@ -30,7 +30,7 @@ class PortfolioService:
     def create_portfolio(
         self, 
         user_id: int,
-        name: int,
+        name: str,
         currency: str
     ) -> int:
         """
@@ -38,8 +38,8 @@ class PortfolioService:
         
         Simple delegation - just creates the model and calls repository
         """
-        if portfolio.currency not in VALID_CURRENCIES:
-            raise ValueError(f"Invalid currency: {portfolio.currency}")
+        if currency not in VALID_CURRENCIES:
+            raise ValueError(f"Invalid currency: {currency}")
         
         
         portfolio = PortfolioData(
