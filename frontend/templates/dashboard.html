@@ -7,7 +7,10 @@
 <!-- Navbar actions -->
 <div class="flex justify-between items-center mb-6">
     <h2 class="text-2xl font-bold text-blue-500">Portfolios</h2>
-    <button onclick="openModal('create-modal')" class="bg-blue-500 text-white px-4 py-2 rounded-lg"> ➕ New Portfolio</button>
+    <button onclick="openModal('create-modal')" class="inline-flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg">
+        <i data-lucide="plus" class="w-4 h-4"></i>
+        New Portfolio
+    </button>
 </div>
 
 <!-- Cards grid (empty for now)-->
@@ -72,3 +75,5 @@
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 {% endblock %}
+
+

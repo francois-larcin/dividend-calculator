@@ -6,6 +6,7 @@
     <title>{% block title %}Dividend Calculator{% endblock %}</title>
 
     <link rel="stylesheet" href="{{ url_for('static', filename='css/output.css') }}">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 <body class="bg-gray-100 min-h-screen">
 
@@ -20,8 +21,21 @@
     </main>
 
     <!-- Scripts JS -->
-    {% block scripts %}
-    {% endblock %}
+    {% block scripts %}{% endblock %}
+
+    <!-- Initialize Lucide (icons) after content-->
+     <script>lucide.createIcons()</script>
+
+    <!-- Global functions -->
+     <script>
+        function openModal(modalId) {
+            document.querySelector(`#${modalId}`).classList.remove('hidden')
+        }
+        
+        function closeModal(modalId) {
+            document.querySelector(`#${modalId}`).classList.add('hidden')
+        }
+    </script>
     
 </body>
 </html>

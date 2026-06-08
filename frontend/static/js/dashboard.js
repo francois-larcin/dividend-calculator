@@ -25,6 +25,8 @@ async function loadPortfolios() {
     // 3. Display in the DOM
     const grid = document.querySelector('#portfolio-grid')
     grid.innerHTML = portfolios.map(p => createPortfolioCard(p)).join('')
+
+    lucide.createIcons()
 }
 
 // Navigate to the portfolio page
@@ -35,11 +37,9 @@ function viewPortfolio(id) {
 // Delete portfolio
 async function deletePortfolio() {
 
-
     // Get the ID stored in modal dataset
     const modal = document.querySelector('#delete-modal')
     const id = parseInt(modal.dataset.portfolioId)
-
 
     await fetch(`/api/portfolios/${id}`, {method: 'DELETE'})
     closeModal('delete-modal')
@@ -65,15 +65,6 @@ async function createPortfolio() {
     loadPortfolios()
 }
 
-//Open modal
-function openModal(modalId) {
-    document.querySelector(`#${modalId}`).classList.remove('hidden')
-}
-
-//Close modal 
-function closeModal(modalId) {
-    document.querySelector(`#${modalId}`).classList.add('hidden')
-}
 
 // Open a portfolio delete modal
 function openDeleteModal(portfolioId) {
@@ -88,3 +79,5 @@ function openDeleteModal(portfolioId) {
 
 // Call the function at page loading
 loadPortfolios()
+
+

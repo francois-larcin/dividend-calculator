@@ -69,8 +69,12 @@ def create_app() -> Flask:
     
     #Main road
     @app.route('/')
-    def index():
+    def dashboard():
         return render_template('dashboard.html')
+    
+    @app.route('/portfolio/<int:portfolio_id>')
+    def portfolio(portfolio_id):
+        return render_template('portfolio.html', portfolio_id=portfolio_id)
     
     #Create repositories
     portfolio_repo = PortfolioRepository(db_config)

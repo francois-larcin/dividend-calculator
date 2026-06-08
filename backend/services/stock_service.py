@@ -160,7 +160,10 @@ class StockService:
         """Get current stock price from yfinance"""
         info = yf.Ticker(ticker).info
         
-        return {'price' : info.get('currentPrice')}
+        return {
+            'price' : info.get('currentPrice'),
+            'currency': info.get('currency')
+        }
     
     # ==========================================
     # HELPER private
