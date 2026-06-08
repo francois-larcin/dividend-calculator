@@ -70,6 +70,11 @@ class StockService:
         return self.stock_repo.get_by_ticker(ticker)
     
     
+    # ==========================================
+    # Real time Yfinance data
+    # ==========================================
+    
+    
     def refresh_one_stock(self, stock_id: int) -> StockData | None: 
         """
         Refresh one stock from yfinance
@@ -149,6 +154,13 @@ class StockService:
         ]
         
         return (local_dicts + yf_filtered)
+    
+    
+    def get_current_price(self, ticker: str) -> float | None:
+        """Get current stock price from yfinance"""
+        info = yf.Ticker(ticker).info
+        
+        return {'price' : info.get('currentPrice')}
     
     # ==========================================
     # HELPER private

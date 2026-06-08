@@ -30,8 +30,6 @@ stock_service: StockService = None
 # READ
 # ==========================================
 
-
-
 @stock_bp.route('/search', methods=['GET'])
 def search_stocks():
     """
@@ -87,6 +85,27 @@ def get_stock_by_ticker(ticker: str):
     return jsonify(asdict(stock)), 200
 
 
+@stock_bp.route('/<ticker>/price', methods=['GET'])
+def get_stock_price(ticker: str):
+    """
+    GET /api/stocks/<ticker>/price
+    
+    Returns stock price by ticker
+    
+    Response 200: {"price": 495}
+    Response 404: {"error": "stock not found"}
+    """
+    
+    price = stock_service.get_current_price(ticker)
+    
+    if price is None:
+        return jsonify({'error': f"No price found for stock {ticker}"}), 404
+    
+    price = stock_service.get_current_price(ticker)
+    
+    return jsonify(price), 200
+    
+
 # ==========================================
 # UPDATE
 # ==========================================
@@ -119,6 +138,7 @@ def refresh_stocks():
     nb_refreshed_stocks = stock_service.refresh_all_stocks()
     
     return jsonify({'number of refreshed stocks': nb_refreshed_stocks}), 200
+
 
 @stock_bp.route('/<int:stock_id>', methods=['DELETE'])
 def delete_stock(stock_id: int):
