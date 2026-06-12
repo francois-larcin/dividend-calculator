@@ -134,9 +134,9 @@ def create_buy_transaction():
     transaction_id = transaction_service.buy_stock(
         portfolio_id=data["portfolio_id"],
         ticker=data["ticker"],
-        quantity=data["quantity"],
-        price=data["price"],
-        fee=data.get("fee", 0.0)
+        quantity=float(data["quantity"]),
+        price=float(data["price"]),
+        fee=float(data.get("fee") or 0.0)
     )
     
     return jsonify({"id": transaction_id}), 201
@@ -164,9 +164,9 @@ def create_sell_transaction():
     transaction_id = transaction_service.sell_stock(
         portfolio_id=data["portfolio_id"],
         ticker=data["ticker"],
-        quantity=data["quantity"],
-        price=data["price"],
-        fee=data.get("fee", 0.0)
+        quantity=float(data["quantity"]),
+        price=float(data["price"]),
+        fee=float(data.get("fee") or 0.0)
     )
     
     return jsonify({"id": transaction_id}), 201
