@@ -102,42 +102,18 @@ class PortfolioService:
     # ==========================================
     # BUSINESS LOGIC - CALCULATION 
     # ==========================================
-    
-    def calculate_portfolio_value(
-        self,
-        portfolio_id: int,
-        current_prices: dict[int, float]
-    ) -> float:
-        """
-        Calculate total portfolio value based on current prices
         
-        Args:
-            portfolio_id: Portfolio to calculate
-            current_price : Dict mapping stock_id -> current_price
-            
-        Returns:
-            Total portfolio value in portfolio currency
-            
-        """
-        holdings = self.holding_repo.get_by_portfolio(portfolio_id)
-        
-        total_value = 0.0
-        for holding in holdings:
-            current_price = current_prices.get(holding.stock_id, 0)
-            holding_value = holding.current_value(current_price)
-            total_value += holding_value
-            
-        return total_value
-    
-    
-    
     def calculate_portfolio_gain(
         self, 
         portfolio_id: int,
         current_prices: dict[int, float]
     ) -> dict:
         """
-        Calculate portfolio P/L
+        Calculate :
+            - P/L (abs)
+            - P/L (%)
+            - total invested
+            - current portfolio value
         
         Returns:
             Dict with 'total_invested', 'current_value', 'gain', 'gain_percent'

@@ -7,8 +7,8 @@ Endpoints:
     GET    /api/portfolios/             → Get all portfolios
     GET    /api/portfolios/<id>         → Get portfolio by ID
     GET    /api/portfolios/<id>/holdings → Get portfolio with holdings
-    GET    /api/portfolios/<id>/value   → Get portfolio total value
-    GET    /api/portfolios/<id>/gain   → Get portfolio total gain
+    GET    /api/portfolios/<id>/gain   → Get portfolio total gain + value
+    
     POST   /api/portfolios/             → Create portfolio
     PUT    /api/portfolios/<id>         → Update portfolio
     DELETE /api/portfolios/<id>         → Delete portfolio
@@ -91,32 +91,6 @@ def get_portfolio_with_holdings(portfolio_id: int):
 # CALCULATE
 # ==========================================
 
-@portfolio_bp.route('/<int:portfolio_id>/value', methods=['GET'])
-def get_portfolio_value(portfolio_id: int):
-    """
-    GET /api/portfolios/<portfolio_id>/value
-    
-    Returns total value of portfolio
-    
-    Response 200: {"total_value": 1, 10000.0}
-    Response 404: {"error": "Portfolio not found"}
-    """
-    
-    portfolio = portfolio_service.get_portfolio_with_holdings(portfolio_id)
-    
-    if portfolio is None:
-        return jsonify({'error': f"Portfolio {portfolio_id} not found"}), 404
-    
-    current_prices = {}
-    for holding in portfolio.holdings:
-        ticker = yf.Ticker(holding.ticker)
-        info = ticker.info
-        
-        current_prices[holding.stock_id] = info.get('currentPrice', 0.0)
-        
-    total_value = portfolio_service.calculate_portfolio_value(portfolio_id, current_prices)
-    
-    return jsonify({'total_value': total_value}), 200
 
 @portfolio_bp.route('/<int:portfolio_id>/gain', methods=['GET'])   
 def get_portfolio_gain(portfolio_id: int):
