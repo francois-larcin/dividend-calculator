@@ -1,16 +1,26 @@
 const portfolioId = document.querySelector('#app').dataset.portfolioId
-console.log(portfolioId);
+let portfolioCurrency = ''
 
 function createHolding(holding) {
     return `
     <tr>
-        <td class="py-3">${holding.ticker}</td>
         <td class="py-3">${holding.company_name}</td>
+        <td class="py-3">${holding.ticker}</td>
+        <td class="py-3">${holding.currency}</td>
         <td class="py-3">${holding.total_shares}</td>
         <td class="py-3">${holding.avg_price}</td>
         <td class="py-3">${holding.total_invested}</td>
-        <td class="py-3">${holding.currency}</td>
         <td class="py-3">-</td>
+
+        <td class="py-3">
+            <button onclick="selectStock('${holding.ticker}', '${holding.company_name}')" class="bg-green-500 text-white px-4 py-2 rounded-lg">
+                Buy
+            </button>
+
+            <button onclick="openSellModal('${holding.ticker}', '${holding.company_name}', ${holding.total_shares})" class="bg-red-500 text-white px-4 py-2 rounded-lg">
+                Sell
+            </button>
+        </td>
     </tr>
     `
 }
@@ -25,6 +35,8 @@ async function loadPortfolio(portfolioId) {
     // 3. Diplay in the DOM
     document.querySelector('#portfolio-name').innerHTML = portfolio.name
     document.querySelector('#portfolio-currency').innerHTML = portfolio.currency
+
+    portfolioCurrency = document.querySelector('#portfolio-currency').innerHTML
 
 
     lucide.createIcons()
@@ -90,29 +102,189 @@ function createSearchResult(result) {
     `
 }
 
+// buy modal logic
 async function selectStock(ticker, companyName) {
     // 1. Hide dropdown (search results)
     const dropdown = document.querySelector('#search-results')
     dropdown.classList.add('hidden')
 
-    // 2. Fill buy modal with ticker and company name
+    // 2. Fill buy modal with ticker, company name and portfolio currency for the fee
     document.querySelector('#buy-ticker').innerHTML = ticker
     document.querySelector('#buy-company').innerHTML = companyName
+    document.querySelector('#buy-currency-label').innerHTML = portfolioCurrency
 
     // 3. Fetch current price and currency
     const response = await fetch(`/api/stocks/${ticker}/price`)
     const data = await response.json()
 
     // 4. Display current price and currency in the DOM
-    document.querySelector('#current-price').innerHTML = data.price
-    document.querySelector('#currency').innerHTML = data.currency
+    document.querySelector('#buy-current-price').innerHTML = data.price
+    document.querySelector('#buy-currency').innerHTML = data.currency
 
     // 5. Open buy modal
     openModal('buy-modal')
 }
 
 
+// Sell modal logic
+async function openSellModal(ticker, companyName, maxShares) {
+    // 1. Fill ticker and company name
+    document.querySelector('#sell-ticker').innerHTML = ticker
+    document.querySelector('#sell-company').innerHTML = companyName
+    document.querySelector('#sell-currency-label').innerHTML = portfolioCurrency
 
-// Direct call at page loading 
-loadPortfolio(portfolioId)
-loadHoldings(portfolioId)
+    // 2. Fecth the current price and currency
+    const response = await fetch(`/api/stocks/${ticker}/price`)
+    const data = await response.json()
+
+    // 3. Display current price and currency in the DOM
+    document.querySelector('#sell-current-price').innerHTML = data.price
+    document.querySelector('#sell-currency').innerHTML = data.currency
+
+    // 4. Define max of sell quantity with total_shares
+    document.querySelector('#sell-quantity').max = maxShares
+
+    // 5. Open sell-modal
+    openModal('sell-modal')
+}
+
+
+function calculateTotal(quantityId, priceId, currencyId, totalId) {
+    const quantity = parseFloat(document.querySelector(quantityId).value)
+    const price = parseFloat(document.querySelector(priceId).innerHTML)
+    const currency = document.querySelector(currencyId).innerHTML
+    const total = (quantity * price).toFixed(2)
+    document.querySelector(totalId).innerHTML = `${total} ${currency}`
+}
+
+
+document.querySelector('#buy-quantity').addEventListener('input', function() {
+    calculateTotal('#buy-quantity', '#buy-current-price', '#buy-currency', '#buy-total')
+})
+
+document.querySelector('#sell-quantity').addEventListener('input', function() {
+    calculateTotal('#sell-quantity', '#sell-current-price', '#sell-currency', '#sell-total')
+})
+
+
+async function buyStock() {
+    // 1. Get all values from buy modal
+    const ticker = document.querySelector('#buy-ticker').innerHTML
+    const quantity = document.querySelector('#buy-quantity').value
+    const price = document.querySelector('#buy-current-price').innerHTML
+    const fee = document.querySelector('#buy-fee').value
+
+    // 2. API call
+    await fetch('/api/transactions/buy', {
+        method: 'POST',
+        headers: {'Content-type': 'application/json'},
+        body: JSON.stringify({
+            portfolio_id: portfolioId, 
+            ticker, 
+            quantity, 
+            price,
+            fee
+        })
+    })
+
+    // 3. Reset buy modal
+    resetModal(
+        ['#buy-quantity', '#buy-fee'],
+        ['#buy-ticker', '#buy-company', '#buy-current-price', '#buy-total', '#buy-currency' ]
+    )
+
+    // 4. Close buy modal and reload holdings
+    closeModal('buy-modal')
+    loadHoldings(portfolioId)
+    lucide.createIcons()
+
+}
+
+async function sellStock(maxShares) {
+    // 1. Get all values from sell-modal
+    const ticker = document.querySelector('#sell-ticker').innerHTML
+    const quantity = document.querySelector('#sell-quantity').value
+    const price = document.querySelector('#sell-current-price').innerHTML
+    const fee = document.querySelector('#sell-fee').value
+
+    if (quantity > maxShares) {
+        alert(`You can't sell more than ${maxShares} positions !`)
+        return
+    }
+
+    // 2. API call
+    await fetch('/api/transactions/sell', {
+        method: 'POST',
+        headers: {'Content-type': 'application/json'},
+        body: JSON.stringify({
+            portfolio_id : portfolioId,
+            ticker,
+            quantity,
+            price,
+            fee
+        })
+    })
+
+    // 3. Reset sell modal
+    resetModal(
+        ['#sell-quantity', '#sell-fee'],
+        ['#sell-ticker', '#sell-company', '#sell-current-price', '#sell-total', '#sell-currency' ]
+    )
+
+    // 4. Close sell modal and reload holdings
+    closeModal('sell-modal')
+    loadHoldings(portfolioId)
+    lucide.createIcons()
+}
+
+// Portfolio total value, life
+async function loadPortfolioValue(portfolioId) {
+    // 1. API call
+    const response = await fetch(`/api/portfolios/${portfolioId}`)
+
+    // 2. Convert into JSON
+    const gainData = await response.json()
+
+    // 3. Diplay in the DOM
+    document.querySelector('#portfolio-name').innerHTML = portfolio.name
+    document.querySelector('#portfolio-currency').innerHTML = portfolio.currency
+
+    portfolioCurrency = document.querySelector('#portfolio-currency').innerHTML
+
+
+    lucide.createIcons()
+}
+
+
+
+// Fecth total gain, gain percent, total value and invested value
+async function loadPortfolioGainData(portfolioId) {
+    // API call
+    const response = await fetch(`/api/portfolios/${portfolioId}/gain`)
+    const gainData = await response.json()
+
+    // Total value
+    document.querySelector('#portfolio-value').innerHTML = `${gainData.current_value.toFixed(2)}`
+
+    // Gain
+    const gainElement = document.querySelector('#portfolio-gain')
+    gainElement.innerHTML = `${gainData.gain.toFixed(2)} (${gainData.gain_percent.toFixed(2)}%)`
+
+    
+    // Color wether it's a profit/loss
+    if (gainData.gain >= 0) {
+        gainElement.classList.add('text-green-500')
+        gainElem
+    } else {
+        gainElement.classList.add('text-red-500')
+    }
+
+}
+
+
+// API call at page loading 
+loadPortfolio(portfolioId) // Quick (just DB)
+loadHoldings(portfolioId)  // Quick (just DB)
+
+loadPortfolioValue(portfolioId)  // Slow (yfinance)
+loadPortfolioGainData(portfolioId)  // Slow (yfinance)

@@ -35,6 +35,20 @@
         function closeModal(modalId) {
             document.querySelector(`#${modalId}`).classList.add('hidden')
         }
+
+        function resetModal(valueIds, displayIds) {
+            // valueIds = list of inputs value
+            valueIds.forEach(id => document.querySelector(id).value = '')
+
+            // displayIds = list of innerHTML 
+            displayIds.forEach(id => document.querySelector(id).innerHTML = '')
+        }
+
+        function cancelModal(modalId, valueIds, displayIds) {
+            // Combine resetModal() + closeModal()
+            resetModal(valueIds, displayIds)
+            closeModal(modalId)
+        }
     </script>
     
 </body>
