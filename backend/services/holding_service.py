@@ -1,3 +1,5 @@
+from dataclasses import asdict
+
 from backend.models import (
     HoldingData
 )
@@ -8,16 +10,22 @@ from backend.repositories import (
     DividendPaymentRepository
 )
 
+from backend.services import (
+    StockService
+)
+
 class HoldingService: 
     def __init__(
         self, 
         holding_repo: HoldingRepository,
         stock_repo: StockRepository,
-        div_payment_repo: DividendPaymentRepository
+        div_payment_repo: DividendPaymentRepository,
+        stock_service: StockService
         ):
         self.holding_repo = holding_repo
         self.stock_repo = stock_repo
         self.div_payment_repo = div_payment_repo
+        self.stock_service = stock_service
         
     # ==========================================
     # SIMPLE DELEGATION (just pass to repository)
@@ -36,6 +44,7 @@ class HoldingService:
     # ==========================================
     # BUSINESS LOGIC - ANALYSE
     # ==========================================
+    
     
     def get_portfolio_allocation_by_sector(self, portfolio_id: int) -> dict[str, float]:
         """Calculate portfolio allocation by sector
@@ -132,3 +141,31 @@ class HoldingService:
             for ticker, value in by_ticker.items()
         }
         
+    def get_holding_with_gain(self, portfolio_id: int) -> list[dict]:
+        """Get holdings with current value and gain calculated"""
+        
+        # 1. Get holdings
+        holdings = self.holding_repo.get_by_portfolio(portfolio_id)
+        result = []
+        
+        
+        for h in holdings:
+            # 2. For each holding, fetch yfinance price
+            current_price = self.stock_service.get_current_price(h.ticker)
+            
+            # 3. Calculate gain & gain_percent 
+            gain = h.unrealized_gain(current_price)
+            gain_percent = h.gain_percentage(current_price)
+            current_value = h.current_value(current_price)
+            
+            # 4. Convert HoldingData into dict so I can enrich it
+            holding_dict = asdict(h)
+            holding_dict["stock_price"] = current_price
+            holding_dict["current_value"] = current_value
+            holding_dict["gain"] = gain
+            holding_dict["gain_percent"] = gain_percent
+            
+            result.append(holding_dict)
+            
+        # 4. Return enriched dicts list
+        return result

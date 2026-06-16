@@ -67,22 +67,35 @@ class HoldingData:
     
     def current_value(self, price: float) -> float:
         """Calculate current market value at given price"""
+        if not price:
+            return 0.0
+        
         return float(self.total_shares * price)
     
     
     def unrealized_gain(self, price: float) -> float:
-        """Calculate unrealized P/L (include fees)"""
-        return float(self.current_value(price) - self.total_invested)
-    
-    def gain_percentage(self, price: float) -> float:
-        """Gain percentage relative to total invested"""
-        if self.total_invested == 0:
+        """Calculate unrealized P/L (include fees) based on current position cost"""
+        if not price:
             return 0.0
         
-        return (self.unrealized_gain(price) / self.total_invested) * 100 
-
-
-######################################      TESTS      ######################################
+        current_cost = float(self.avg_price * self.total_shares)
+        return float(self.current_value(price) - current_cost)
+    
+    
+    def gain_percentage(self, price: float) -> float:
+        """Gain percentage relative to current position cost"""
+        if not price:
+            return 0.0
+        
+        current_cost = float(self.avg_price * self.total_shares)
+        
+        if current_cost == 0:
+            return 0.0
+        
+        return (self.unrealized_gain(price) / current_cost) * 100 
+    
+    
+###################################      TESTS      ###################################
 
 if __name__ == "__main__":
     print("=== Tests HoldingData - Calculs de frais ===\n")

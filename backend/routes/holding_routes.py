@@ -5,6 +5,8 @@ REST API endpoints for holding management.
 
 Endpoints:
 GET /api/holdings/<portfolio_id>                              → Get all holdings
+GET /api/holdings/<portfolio_id>/with-gain                    → Get all holdings with gain data
+
 GET /api/holdings/<portfolio_id>/<stock_id>                   → Get specific holding
 GET /api/holdings/<portfolio_id>/allocation/currency          → Allocation per currency
 GET /api/holdings/<portfolio_id>/allocation/sector            → Allocation per sector
@@ -46,6 +48,23 @@ def get_portfolio_holdings(portfolio_id: int):
     
     return jsonify([asdict(h) for h in holdings]), 200
 
+
+@holding_bp.route('/<int:portfolio_id>/with-gain', methods=['GET'])
+def get_holdings_with_gain_data(portfolio_id: int):
+    """
+    GET /api/holdings/<portfolio_id>/with-gain
+    
+    Returns 200 : [
+        {"stock_id": 2, ..., "stock_price": 75, "current_value": 2500, "gain": 348...},
+        {"stock_id": 2, ..., "stock_price": 19, "current_value": 1800, "gain": 134...},
+    ]
+    Response 404: {"error": "stock not found"}
+    """
+    
+    holdings = holding_service.get_holding_with_gain(portfolio_id)
+    
+    return jsonify(holdings), 200
+    
 
 @holding_bp.route('/<int:portfolio_id>/<int:stock_id>', methods=['GET'])
 def get_holding(portfolio_id: int, stock_id: int):

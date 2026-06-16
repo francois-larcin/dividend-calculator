@@ -97,13 +97,17 @@ def get_stock_price(ticker: str):
     """
     
     price = stock_service.get_current_price(ticker)
+    stock = stock_service.get_stocks_by_ticker(ticker)
     
     if price is None:
         return jsonify({'error': f"No price found for stock {ticker}"}), 404
     
     price = stock_service.get_current_price(ticker)
     
-    return jsonify(price), 200
+    return jsonify({
+        'price': price,
+        'currency': stock.currency if stock else 'USD'
+    }), 200
     
 
 # ==========================================

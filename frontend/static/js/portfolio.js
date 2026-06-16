@@ -2,6 +2,7 @@ const portfolioId = document.querySelector('#app').dataset.portfolioId
 let portfolioCurrency = ''
 
 function createHolding(holding) {
+
     return `
     <tr>
         <td class="py-3">${holding.company_name}</td>
@@ -10,7 +11,9 @@ function createHolding(holding) {
         <td class="py-3">${holding.total_shares}</td>
         <td class="py-3">${holding.avg_price}</td>
         <td class="py-3">${holding.total_invested}</td>
-        <td class="py-3">-</td>
+        <td class="py-3 ${holding.gain_percent >= 0 ? 'text-green-500' : 'text-red-500'}">
+        ${holding.gain_percent.toFixed(2)}
+        </td>
 
         <td class="py-3">
             <button onclick="selectStock('${holding.ticker}', '${holding.company_name}')" class="bg-green-500 text-white px-4 py-2 rounded-lg">
@@ -44,13 +47,14 @@ async function loadPortfolio(portfolioId) {
 }
 
 async function loadHoldings(portfolioId) {
-    // 1. API call
-    const response = await fetch(`/api/holdings/${portfolioId}`)
-
-    // 2. Convert into JSON
+    // 1. Get the holdings
+    const response = await fetch(`/api/holdings/${portfolioId}/with-gain`)
     const holdings = await response.json()
 
-    // 3. Display in the DOM
+    console.log('Holdings', holdings);
+    
+
+    // 2. Display in the DOM 
     const tbody = document.querySelector('#holdings-table')
     tbody.innerHTML = holdings.map(h => createHolding(h)).join('')
 
@@ -117,9 +121,12 @@ async function selectStock(ticker, companyName) {
     const response = await fetch(`/api/stocks/${ticker}/price`)
     const data = await response.json()
 
+    console.log('data', data);
+
     // 4. Display current price and currency in the DOM
-    document.querySelector('#buy-current-price').innerHTML = data.price
-    document.querySelector('#buy-currency').innerHTML = data.currency
+    document.querySelector('#buy-price').value = data.price
+    document.querySelector('#buy-stock-currency').innerHTML = data.currency
+    document.querySelector('#buy-total-currency').innerHTML = data.currency
 
     // 5. Open buy modal
     openModal('buy-modal')
@@ -138,8 +145,9 @@ async function openSellModal(ticker, companyName, maxShares) {
     const data = await response.json()
 
     // 3. Display current price and currency in the DOM
-    document.querySelector('#sell-current-price').innerHTML = data.price
-    document.querySelector('#sell-currency').innerHTML = data.currency
+    document.querySelector('#sell-price').value = data.price
+    document.querySelector('#sell-stock-currency').innerHTML = data.currency
+    document.querySelector('#sell-total-currency').innerHTML = data.currency
 
     // 4. Define max of sell quantity with total_shares
     document.querySelector('#sell-quantity').max = maxShares
@@ -151,7 +159,7 @@ async function openSellModal(ticker, companyName, maxShares) {
 
 function calculateTotal(quantityId, priceId, currencyId, totalId) {
     const quantity = parseFloat(document.querySelector(quantityId).value)
-    const price = parseFloat(document.querySelector(priceId).innerHTML)
+    const price = parseFloat(document.querySelector(priceId).value)
     const currency = document.querySelector(currencyId).innerHTML
     const total = (quantity * price).toFixed(2)
     document.querySelector(totalId).innerHTML = `${total} ${currency}`
@@ -159,11 +167,11 @@ function calculateTotal(quantityId, priceId, currencyId, totalId) {
 
 
 document.querySelector('#buy-quantity').addEventListener('input', function() {
-    calculateTotal('#buy-quantity', '#buy-current-price', '#buy-currency', '#buy-total')
+    calculateTotal('#buy-quantity', '#buy-price', '#buy-stock-currency', '#buy-total')
 })
 
 document.querySelector('#sell-quantity').addEventListener('input', function() {
-    calculateTotal('#sell-quantity', '#sell-current-price', '#sell-currency', '#sell-total')
+    calculateTotal('#sell-quantity', '#sell-price', '#sell-stock-currency', '#sell-total')
 })
 
 
@@ -171,7 +179,7 @@ async function buyStock() {
     // 1. Get all values from buy modal
     const ticker = document.querySelector('#buy-ticker').innerHTML
     const quantity = document.querySelector('#buy-quantity').value
-    const price = document.querySelector('#buy-current-price').innerHTML
+    const price = document.querySelector('#buy-price').value
     const fee = document.querySelector('#buy-fee').value
 
     // 2. API call
@@ -189,8 +197,8 @@ async function buyStock() {
 
     // 3. Reset buy modal
     resetModal(
-        ['#buy-quantity', '#buy-fee'],
-        ['#buy-ticker', '#buy-company', '#buy-current-price', '#buy-total', '#buy-currency' ]
+        ['#buy-quantity', '#buy-fee', '#buy-price'],
+        ['#buy-ticker', '#buy-company', '#buy-total', '#buy-stock-currency', '#buy-total-currency' ]
     )
 
     // 4. Close buy modal and reload holdings
@@ -204,7 +212,7 @@ async function sellStock(maxShares) {
     // 1. Get all values from sell-modal
     const ticker = document.querySelector('#sell-ticker').innerHTML
     const quantity = document.querySelector('#sell-quantity').value
-    const price = document.querySelector('#sell-current-price').innerHTML
+    const price = document.querySelector('#sell-price').value
     const fee = document.querySelector('#sell-fee').value
 
     if (quantity > maxShares) {
@@ -227,8 +235,8 @@ async function sellStock(maxShares) {
 
     // 3. Reset sell modal
     resetModal(
-        ['#sell-quantity', '#sell-fee'],
-        ['#sell-ticker', '#sell-company', '#sell-current-price', '#sell-total', '#sell-currency' ]
+        ['#sell-quantity', '#sell-fee', '#sell-price'],
+        ['#sell-ticker', '#sell-company', '#sell-total', '#sell-stock-currency' ]
     )
 
     // 4. Close sell modal and reload holdings
@@ -243,7 +251,7 @@ async function loadPortfolioValue(portfolioId) {
     const response = await fetch(`/api/portfolios/${portfolioId}`)
 
     // 2. Convert into JSON
-    const gainData = await response.json()
+    const portfolio = await response.json()
 
     // 3. Diplay in the DOM
     document.querySelector('#portfolio-name').innerHTML = portfolio.name

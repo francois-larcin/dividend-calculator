@@ -159,11 +159,11 @@ class StockService:
     def get_current_price(self, ticker: str) -> float | None:
         """Get current stock price from yfinance"""
         info = yf.Ticker(ticker).info
-        
-        return {
-            'price' : info.get('currentPrice'),
-            'currency': info.get('currency')
-        }
+        return (
+            info.get('currentPrice') or
+            info.get('regularMarketPrice') or
+            0.0
+        )
     
     # ==========================================
     # HELPER private

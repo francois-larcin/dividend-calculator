@@ -104,7 +104,8 @@ def create_app() -> Flask:
     holding_service = HoldingService(
         holding_repo=holding_repo,
         stock_repo=stock_repo,
-        div_payment_repo=div_payment_repo
+        div_payment_repo=div_payment_repo,
+        stock_service=stock_service
     )
     
     div_payment_service = DividendPaymentService(
