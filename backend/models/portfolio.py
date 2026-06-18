@@ -205,7 +205,7 @@ if __name__ == "__main__":
     print(f"\nTest 8 - Analyse des frais:")
     for holding in portfolio:
         print(f"  {holding.ticker}:")
-        print(f"    Coût sans frais: {holding.cost_without_fees:.2f}")
+        print(f"    Coût sans frais: {holding.total_invested_without_fees:.2f}")
         print(f"    Frais totaux: {holding.total_fees:.2f}")
         print(f"    Frais %: {holding.fee_percentage:.2f}%")
         print(f"    Frais raisonnables: {holding.has_reasonable_fees}")

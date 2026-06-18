@@ -9,7 +9,6 @@ class HoldingData:
     company_name: str
     total_shares: float
     avg_price: float
-    total_invested: float # with fees (comes from DB)
     currency: str = 'EUR'
     date_added: dt.datetime | None = None
     portfolio_id: int | None = None
@@ -26,39 +25,12 @@ class HoldingData:
     # ==========================================
     # COST CALCULATIONS
     # ==========================================
- 
+     
     @property
-    def cost_without_fees(self) -> float:
-        """Returns therorical cost as if there were no transaction fee"""
+    def total_invested(self) -> float:
+        """Returns the total invested with current positions"""
         return float(self.total_shares * self.avg_price)
-    
-    
-    @property
-    def total_fees(self) -> float:
-        """Calculate total transaction fee paid"""
-    
-        return float(self.total_invested - self.cost_without_fees)
-    
-    
-    @property 
-    def fee_percentage(self) -> float:
-        """Calculate implied fee percentage"""
-        expected_cost = self.total_shares * self.avg_price
-        implied_fee = self.total_invested - expected_cost
         
-        if expected_cost == 0:
-            return 0.0
-        
-        return float((implied_fee / expected_cost) * 100)
-    
-    # ==========================================
-    # VALIDATIONS
-    # ==========================================
-    @property
-    def has_reasonable_fees(self) -> bool:
-        """Check if fees are within reasonable range (< 5%)"""
-        return 0 <= self.fee_percentage <= 5.0
-    
     
     # ==========================================
     # CALCULATIONS WITH CURRENT PRICE
@@ -77,22 +49,17 @@ class HoldingData:
         """Calculate unrealized P/L (include fees) based on current position cost"""
         if not price:
             return 0.0
-        
-        current_cost = float(self.avg_price * self.total_shares)
-        return float(self.current_value(price) - current_cost)
+    
+        return float(self.current_value(price) - self.total_invested)
     
     
     def gain_percentage(self, price: float) -> float:
         """Gain percentage relative to current position cost"""
-        if not price:
+        
+        if self.total_invested == 0 or not price:
             return 0.0
         
-        current_cost = float(self.avg_price * self.total_shares)
-        
-        if current_cost == 0:
-            return 0.0
-        
-        return (self.unrealized_gain(price) / current_cost) * 100 
+        return (self.unrealized_gain(price) / self.total_invested) * 100 
     
     
 ###################################      TESTS      ###################################
@@ -108,7 +75,6 @@ if __name__ == "__main__":
         company_name='Apple Inc.',
         total_shares=10.0,
         avg_price=150.0,
-        total_invested=1505.0,  # 10 × 150 + 5€ de frais
         date_added=dt.datetime(2024, 1, 15)
     )
     
@@ -116,12 +82,6 @@ if __name__ == "__main__":
     print(f"\nDétail des coûts:")
     print(f"  Shares: {holding.total_shares}")
     print(f"  Prix moyen: {holding.avg_price:.2f}€")
-    print(f"  Coût sans frais: {holding.cost_without_fees:.2f}€")
-    print(f"  Total investi (AVEC frais): {holding.total_invested:.2f}€")
-    print(f"  Frais totaux: {holding.total_fees:.2f}€")
-    print(f"  Frais en %: {holding.fee_percentage:.2f}%")
-    print(f"  Frais raisonnables: {holding.has_reasonable_fees}")
-  
     
     # Test avec prix actuel
     current_price = 170.0

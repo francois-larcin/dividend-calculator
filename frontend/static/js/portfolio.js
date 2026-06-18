@@ -11,6 +11,9 @@ function createHolding(holding) {
         <td class="py-3">${holding.total_shares}</td>
         <td class="py-3">${holding.avg_price}</td>
         <td class="py-3">${holding.total_invested}</td>
+        <td class="py-3 ${holding.gain >= 0 ? 'text-green-500' : 'text-red-500'}">
+        ${holding.gain.toFixed(2)}
+        </td>
         <td class="py-3 ${holding.gain_percent >= 0 ? 'text-green-500' : 'text-red-500'}">
         ${holding.gain_percent.toFixed(2)}
         </td>
@@ -204,6 +207,7 @@ async function buyStock() {
     // 4. Close buy modal and reload holdings
     closeModal('buy-modal')
     loadHoldings(portfolioId)
+    loadPortfolioGainData(portfolioId)
     lucide.createIcons()
 
 }
@@ -242,6 +246,7 @@ async function sellStock(maxShares) {
     // 4. Close sell modal and reload holdings
     closeModal('sell-modal')
     loadHoldings(portfolioId)
+    loadPortfolioGainData(portfolioId)
     lucide.createIcons()
 }
 
@@ -267,12 +272,17 @@ async function loadPortfolioValue(portfolioId) {
 
 // Fecth total gain, gain percent, total value and invested value
 async function loadPortfolioGainData(portfolioId) {
+
     // API call
     const response = await fetch(`/api/portfolios/${portfolioId}/gain`)
     const gainData = await response.json()
 
-    // Total value
-    document.querySelector('#portfolio-value').innerHTML = `${gainData.current_value.toFixed(2)}`
+    // Current value
+    document.querySelector('#portfolio-total-value').innerHTML = `${portfolioCurrency} ${gainData.current_value.toFixed(2)}`
+
+    // Invested value
+    document.querySelector('#portfolio-invested-value').innerHTML = `${portfolioCurrency}
+    ${gainData.total_invested.toFixed(2)}`
 
     // Gain
     const gainElement = document.querySelector('#portfolio-gain')
@@ -280,13 +290,13 @@ async function loadPortfolioGainData(portfolioId) {
 
     
     // Color wether it's a profit/loss
+    gainElement.classList.remove('text-green-500', 'text-red-500')
+
     if (gainData.gain >= 0) {
         gainElement.classList.add('text-green-500')
-        gainElem
     } else {
         gainElement.classList.add('text-red-500')
     }
-
 }
 
 

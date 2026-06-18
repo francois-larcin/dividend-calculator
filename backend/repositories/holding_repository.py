@@ -34,7 +34,7 @@ class HoldingRepository:
         """
         
         query = """
-            SELECT portfolio_id, stock_id, ticker, company_name, currency, total_shares, avg_price, date_added, total_invested
+            SELECT portfolio_id, stock_id, ticker, company_name, currency, total_shares, avg_price, date_added
             FROM current_holdings
             WHERE portfolio_id = %s
         """
@@ -54,7 +54,6 @@ class HoldingRepository:
                 total_shares=float(row[5]) if row[5] is not None else 0.0,
                 avg_price=float(row[6]) if row[6] is not None else 0.0,
                 date_added=row[7],
-                total_invested=float(row[8]) if row[8] is not None else 0.0,
                 )
             for row in rows   
             ]
@@ -73,7 +72,7 @@ class HoldingRepository:
         """
         
         query = """
-            SELECT portfolio_id, stock_id, ticker, company_name, currency, total_shares, avg_price, date_added, total_invested
+            SELECT portfolio_id, stock_id, ticker, company_name, currency, total_shares, avg_price, date_added
             FROM current_holdings
             WHERE portfolio_id = %s AND stock_id = %s
         """
@@ -95,7 +94,6 @@ class HoldingRepository:
                 total_shares=float(row[5]) if row[5] is not None else 0.0,
                 avg_price=float(row[6]) if row[6] is not None else 0.0,
                 date_added=row[7],
-                total_invested=float(row[8]) if row[8] is not None else 0.0,
                 )
             
     

@@ -153,10 +153,11 @@ class HoldingService:
             # 2. For each holding, fetch yfinance price
             current_price = self.stock_service.get_current_price(h.ticker)
             
-            # 3. Calculate gain & gain_percent 
+            # 3. Calculate gain & gain_percent, current_value and total_invested
             gain = h.unrealized_gain(current_price)
             gain_percent = h.gain_percentage(current_price)
             current_value = h.current_value(current_price)
+            total_invested = h.total_invested
             
             # 4. Convert HoldingData into dict so I can enrich it
             holding_dict = asdict(h)
@@ -164,8 +165,10 @@ class HoldingService:
             holding_dict["current_value"] = current_value
             holding_dict["gain"] = gain
             holding_dict["gain_percent"] = gain_percent
+            holding_dict["total_invested"] = total_invested
             
             result.append(holding_dict)
+            print(holding_dict)
             
         # 4. Return enriched dicts list
         return result
