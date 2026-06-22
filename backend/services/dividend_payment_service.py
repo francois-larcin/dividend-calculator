@@ -53,6 +53,7 @@ class DividendPaymentService:
     
     def get_by_portfolio_and_date_range(self, portfolio_id: int, start_date: dt.date, end_date: dt.date) -> list[DividendPaymentData]:
         return self.div_payment_repo.get_by_portfolio_and_date_range(portfolio_id, start_date, end_date)
+         
             
     def delete_div_payment(self, div_payment_id: int) -> None:
         self.div_payment_repo.delete(div_payment_id)
@@ -66,6 +67,7 @@ class DividendPaymentService:
         list_div_payments = self.div_payment_repo.get_by_portfolio(portfolio_id)
         
         return float(sum(dp.total_amount for dp in list_div_payments))
+ 
  
     def get_total_dividend_received_by_stock(self, portfolio_id: int, stock_id: int) -> float:
         list_div_payments = self.div_payment_repo.get_by_portfolio_and_stock(portfolio_id, stock_id)
@@ -108,6 +110,7 @@ class DividendPaymentService:
             return 0.0
         
         return float((total_div_received / holding.total_invested) * 100)
+       
         
     def sync_dividends(self, portfolio_id: int) -> int:
         """

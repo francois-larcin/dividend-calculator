@@ -84,7 +84,7 @@ class HoldingService:
         
         for holding in holdings:
             currency = holding.currency
-            print(f"Currency : {currency}")
+            #print(f"Currency : {currency}")
             by_currency[currency] = by_currency.get(currency, 0) + holding.total_invested
             
         return {
@@ -168,7 +168,7 @@ class HoldingService:
             holding_dict["total_invested"] = total_invested
             
             result.append(holding_dict)
-            print(holding_dict)
+            #print(holding_dict)
             
         # 4. Return enriched dicts list
         return result

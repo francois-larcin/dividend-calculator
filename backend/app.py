@@ -118,11 +118,18 @@ def create_app() -> Flask:
     
     #Inject service into routes
     portfolio_routes.portfolio_service = portfolio_service
+    
     transaction_routes.transaction_service = transaction_service
+    transaction_routes.portfolio_service = portfolio_service
+    transaction_routes.stock_service = stock_service
+    
     stock_routes.stock_service = stock_service
+    
     holding_routes.holding_service = holding_service
     holding_routes.portfolio_service = portfolio_service
+    
     dividend_payment_routes.div_payment_service = div_payment_service
+    dividend_payment_routes.portfolio_service = portfolio_service
     
     
     #Register blueprints (URL prefixes)

@@ -95,7 +95,28 @@ class TransactionService:
     def get_portfolio_stock_transactions(self, portfolio_id: int, stock_id: int) -> list[TransactionData]:
         """Get all the transaction for a stock in a portfolio"""
         return self.transaction_repo.get_by_portfolio_and_stock(portfolio_id, stock_id)
+
+    # ==========================================
+    # BUSINESS LOGIC - CALCULATION 
+    # ==========================================
     
+    def get_realized_gain_by_portfolio_and_stock(
+        self, 
+        portfolio_id: int, 
+        stock_id: int
+        ) -> float:
+        """Calculate the total gain for all SELL transactions concerning one stock"""
+        
+        list_sell_transaction = self.transaction_repo.get_sell_transactions_by_portfolio_and_stock(portfolio_id, stock_id)
+        
+        return float(sum(t.gain_per_sell for t in list_sell_transaction))
+    
+    
+    def get_realized_gain_by_portfolio(self, portfolio_id: int) -> float:
+        """Calculate total gain for portfolio all SELL transactions"""
+        list_sell_transaction = self.transaction_repo.get_sell_transactions_by_portfolio(portfolio_id)
+        
+        return float(sum(t.gain_per_sell for t in list_sell_transaction))
          
     # ==========================================
     # BUSINESS LOGIC - USER WORKFLOW 
@@ -232,6 +253,7 @@ class TransactionService:
             quantity=quantity,
             price=price,
             fee=fee,
+            avg_price_at_sell=holding.avg_price, 
             transaction_date=dt.datetime.now()
         )
         

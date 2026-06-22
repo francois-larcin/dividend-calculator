@@ -11,6 +11,7 @@ class TransactionData:
     price: float
     
     fee: float = 0.0
+    avg_price_at_sell: float | None = None
     transaction_date: dt.datetime | None = None
     id: int | None = None
     
@@ -44,6 +45,13 @@ class TransactionData:
     def subtotal(self) -> float:
         """Calculate subtotal without fee"""
         return self.quantity * self.price
+    
+    @property
+    def gain_per_sell(self) -> float:
+        """Calculate P/L for one sell transaction"""
+        if self.type == "BUY" or self.avg_price_at_sell is None:
+            return 0.0
+        return float((self.price - self.avg_price_at_sell) * self.quantity)
 
 
 ######################################      TESTS      ######################################  

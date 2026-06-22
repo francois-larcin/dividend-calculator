@@ -23,12 +23,14 @@ from flask import Blueprint, jsonify, request
 from dataclasses import asdict
 
 from backend.services import (
-    DividendPaymentService
+    DividendPaymentService,
+    PortfolioService
 )
 
 div_payment_bp = Blueprint('dividend_payment', __name__)
 
 div_payment_service: DividendPaymentService = None
+portfolio_service: PortfolioService = None
 
 import datetime as dt
 
@@ -56,12 +58,17 @@ def get_portfolio_div_payment(portfolio_id: int):
 @div_payment_bp.route('/portfolio/<int:portfolio_id>/total', methods=['GET'])
 def get_portfolio_total_div_received(portfolio_id: int):
     """
-    GET /api/dividends/<portfolio_id>/total
+    GET /api/dividends/portfolio/<portfolio_id>/total
     
     Returns total of all dividend received for a portfolio
     
     Response 200: {"total_dividend": 345.98}
+    Response 404: {"error": "Portfolio not found"}
     """
+    
+    portfolio = portfolio_service.get_portfolio(portfolio_id)
+    if portfolio is None:
+        return jsonify({'error': f'Portfolio {portfolio_id} not found'}), 404
     
     total = div_payment_service.get_total_dividend_received_by_portfolio(portfolio_id)
     

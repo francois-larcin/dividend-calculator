@@ -33,9 +33,9 @@ class TransactionRepository:
             
         query = """
             INSERT INTO transactions (
-                portfolio_id, stock_id, type, quantity, price, fee, transaction_date
+                portfolio_id, stock_id, type, quantity, price, fee, avg_price_at_sell, transaction_date
             )
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             RETURNING id
         """
         
@@ -48,6 +48,7 @@ class TransactionRepository:
                 transaction.quantity,
                 transaction.price,
                 transaction.fee,
+                transaction.avg_price_at_sell,
                 transaction.transaction_date or dt.datetime.now()
             ))
             
@@ -70,7 +71,7 @@ class TransactionRepository:
         """
         
         query = """
-            SELECT id, portfolio_id, stock_id, type, quantity, price, fee, transaction_date
+            SELECT id, portfolio_id, stock_id, type, quantity, price, fee, avg_price_at_sell, transaction_date
             FROM transactions 
             WHERE id = %s
         """
@@ -91,7 +92,8 @@ class TransactionRepository:
                 quantity=row[4],
                 price=row[5],
                 fee=row[6],
-                transaction_date=row[7]
+                avg_price_at_sell=row[7],
+                transaction_date=row[8]
             )
         
         
@@ -104,7 +106,7 @@ class TransactionRepository:
         """
         
         query = """
-            SELECT id, portfolio_id, stock_id, type, quantity, price, fee, transaction_date
+            SELECT id, portfolio_id, stock_id, type, quantity, price, fee, avg_price_at_sell, transaction_date
             FROM transactions 
         """
         
@@ -122,7 +124,8 @@ class TransactionRepository:
                 quantity=row[4],
                 price=row[5],
                 fee=row[6],
-                transaction_date=row[7]
+                avg_price_at_sell=row[7],
+                transaction_date=row[8]
             )
             for row in rows
             ]
@@ -146,6 +149,7 @@ class TransactionRepository:
             quantity = %s,
             price = %s,
             fee = %s,
+            avg_price_at_sell = %s,
             transaction_date = %s
             WHERE id = %s
         """
@@ -159,6 +163,7 @@ class TransactionRepository:
                 transaction.quantity,
                 transaction.price,
                 transaction.fee,
+                transaction.avg_price_at_sell,
                 transaction.transaction_date or dt.datetime.now(),
                 transaction.id,
             ))
@@ -197,7 +202,7 @@ class TransactionRepository:
         """
         
         query = """
-            SELECT id, portfolio_id, stock_id, type, quantity, price, fee, transaction_date
+            SELECT id, portfolio_id, stock_id, type, quantity, price, fee, avg_price_at_sell, transaction_date
             FROM transactions
             WHERE portfolio_id = %s
         """
@@ -216,12 +221,51 @@ class TransactionRepository:
                 quantity=row[4],
                 price=row[5],
                 fee=row[6],
-                transaction_date=row[7]
+                avg_price_at_sell=row[7],
+                transaction_date=row[8]
                 )
             for row in rows   
             ]
       
+
+    def get_sell_transactions_by_portfolio(self, portfolio_id: int) -> list[TransactionData]:
+            """
+            Get all the SELL transcation for a portfolio searched by its id
+            
+            Args:
+                portfolio_id: the portfolio id to find
+                
+            Returns:
+                list[TransactionData] if found, None otherwhise
+            """
+            
+            query = """
+                SELECT id, portfolio_id, stock_id, type, quantity, price, fee, avg_price_at_sell, transaction_date
+                FROM transactions
+                WHERE portfolio_id = %s AND type = 'SELL'
+            """
+            
+            with DatabaseConnection(self.db_config) as conn:
+                cursor = conn.cursor()
+                cursor.execute(query, (portfolio_id, ))
+                rows = cursor.fetchall()
+                
+                return [
+                    TransactionData(
+                    id=row[0],
+                    portfolio_id=row[1],
+                    stock_id=row[2],
+                    type=row[3],
+                    quantity=row[4],
+                    price=row[5],
+                    fee=row[6],
+                    avg_price_at_sell=row[7],
+                    transaction_date=row[8]
+                    )
+                for row in rows   
+                ]
         
+
     def get_by_stock(self, stock_id: int) -> list[TransactionData]:
         """
         Get all the transactions for one specific stock
@@ -234,7 +278,7 @@ class TransactionRepository:
         """
         
         query = """
-            SELECT id, portfolio_id, stock_id, type, quantity, price, fee, transaction_date
+            SELECT id, portfolio_id, stock_id, type, quantity, price, fee, avg_price_at_sell, transaction_date
             FROM transactions
             WHERE stock_id = %s
         """
@@ -253,7 +297,8 @@ class TransactionRepository:
                 quantity=row[4],
                 price=row[5],
                 fee=row[6],
-                transaction_date=row[7]
+                avg_price_at_sell=row[7],
+                transaction_date=row[8]
                 )
             for row in rows   
             ]
@@ -272,7 +317,7 @@ class TransactionRepository:
         """
         
         query = """
-            SELECT id, portfolio_id, stock_id, type, quantity, price, fee, transaction_date
+            SELECT id, portfolio_id, stock_id, type, quantity, price, fee, avg_price_at_sell, transaction_date
             FROM transactions
             WHERE portfolio_id = %s AND stock_id = %s
             ORDER BY transaction_date DESC
@@ -292,11 +337,51 @@ class TransactionRepository:
                 quantity=row[4],
                 price=row[5],
                 fee=row[6],
-                transaction_date=row[7]
+                avg_price_at_sell=row[7],
+                transaction_date=row[8]
                 )
             for row in rows   
             ]
+    
+    
+    
+    def get_sell_transactions_by_portfolio_and_stock(self, portfolio_id: int, stock_id: int) -> list[TransactionData]:
+        """
+        Get all the SELL transactions for one specific stock
         
+        Args:
+            stock_id : the id from the stock
+            
+        Returns:
+            List of TransactionData with that stock_id
+        """
+        
+        query = """
+            SELECT id, portfolio_id, stock_id, type, quantity, price, fee, avg_price_at_sell, transaction_date
+            FROM transactions
+            WHERE portfolio_id = %s AND stock_id = %s AND type = 'SELL'
+            ORDER BY transaction_date DESC
+        """
+        
+        with DatabaseConnection(self.db_config) as conn:
+            cursor = conn.cursor()
+            cursor.execute(query, (portfolio_id, stock_id, ))
+            rows = cursor.fetchall()
+            
+            return [
+                TransactionData(
+                id=row[0],
+                portfolio_id=row[1],
+                stock_id=row[2],
+                type=row[3],
+                quantity=row[4],
+                price=row[5],
+                fee=row[6],
+                avg_price_at_sell=row[7],
+                transaction_date=row[8]
+                )
+            for row in rows   
+            ]
         
         
         

@@ -9,14 +9,27 @@ function createHolding(holding) {
         <td class="py-3">${holding.ticker}</td>
         <td class="py-3">${holding.currency}</td>
         <td class="py-3">${holding.total_shares}</td>
-        <td class="py-3">${holding.avg_price}</td>
-        <td class="py-3">${holding.total_invested}</td>
+        <td class="py-3">${holding.avg_price.toLocaleString('fr-FR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        })}</td>
+
+        <td class="py-3">${holding.total_invested.toLocaleString('fr-FR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        })}</td>
+
         <td class="py-3 ${holding.gain >= 0 ? 'text-green-500' : 'text-red-500'}">
-        ${holding.gain.toFixed(2)}
-        </td>
+        ${holding.gain.toLocaleString('fr-FR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        })}</td>
+
         <td class="py-3 ${holding.gain_percent >= 0 ? 'text-green-500' : 'text-red-500'}">
-        ${holding.gain_percent.toFixed(2)}
-        </td>
+        ${holding.gain_percent.toLocaleString('fr-FR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        })} %</td>
 
         <td class="py-3">
             <button onclick="selectStock('${holding.ticker}', '${holding.company_name}')" class="bg-green-500 text-white px-4 py-2 rounded-lg">
@@ -30,6 +43,7 @@ function createHolding(holding) {
     </tr>
     `
 }
+
 
 async function loadPortfolio(portfolioId) {
     // 1. API call
@@ -278,15 +292,27 @@ async function loadPortfolioGainData(portfolioId) {
     const gainData = await response.json()
 
     // Current value
-    document.querySelector('#portfolio-total-value').innerHTML = `${portfolioCurrency} ${gainData.current_value.toFixed(2)}`
+    document.querySelector('#portfolio-total-value').innerHTML = `${gainData.current_value.toLocaleString('fr-FR', {
+        minimumFractionDigits: 2, 
+        maximumFractionDigits: 2
+    })}`
 
     // Invested value
-    document.querySelector('#portfolio-invested-value').innerHTML = `${portfolioCurrency}
-    ${gainData.total_invested.toFixed(2)}`
+    document.querySelector('#portfolio-invested-value').innerHTML = 
+    `${gainData.total_invested.toLocaleString('fr-FR', {
+        minimumFractionDigits: 2, 
+        maximumFractionDigits: 2
+    })}`
 
     // Gain
     const gainElement = document.querySelector('#portfolio-gain')
-    gainElement.innerHTML = `${gainData.gain.toFixed(2)} (${gainData.gain_percent.toFixed(2)}%)`
+    gainElement.innerHTML = `${gainData.gain.toLocaleString('fr-FR', {
+        minimumFractionDigits: 2, 
+        maximumFractionDigits: 2
+    })} (${gainData.gain_percent.toLocaleString('fr-FR', {
+        minimumFractionDigits: 2, 
+        maximumFractionDigits: 2
+    })}%)`
 
     
     // Color wether it's a profit/loss
@@ -299,10 +325,33 @@ async function loadPortfolioGainData(portfolioId) {
     }
 }
 
+// Fecth total realized gain + conditional display
+async function loadPortfolioRealizedGain(portfolioId) {
+    // API call
+    const response = await fetch(`/api/transactions/portfolio/${portfolioId}/realized-gain`)
+    const gainData = await response.json()
+
+    //Display value in the DOM
+    const gainElement = document.querySelector('#portfolio-realized-gain')
+    gainElement.innerHTML = gainData.total_realized_gain.toLocaleString('fr-FR', {
+        minimumFractionDigits: 2, 
+        maximumFractionDigits: 2
+    })
+
+    // Color wether it's a profit/loss
+    gainElement.classList.remove('text-green-500', 'text-red-500')
+    if (gainData.total_realized_gain >= 0) {
+        gainElement.classList.add('text-green-500')
+    } else {
+        gainElement.classList.add('text-red-500')
+    }
+}
+
 
 // API call at page loading 
 loadPortfolio(portfolioId) // Quick (just DB)
 loadHoldings(portfolioId)  // Quick (just DB)
+loadPortfolioRealizedGain(portfolioId) // Quick (just DB)
 
 loadPortfolioValue(portfolioId)  // Slow (yfinance)
 loadPortfolioGainData(portfolioId)  // Slow (yfinance)

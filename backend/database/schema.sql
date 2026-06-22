@@ -50,6 +50,10 @@ CREATE TABLE dividend_payments (
 );
 
 -- Table 5 : transactions
+ALTER TABLE transactions 
+ADD COLUMN avg_price_at_sell DECIMAL(10, 2) 
+CHECK (avg_price_at_sell IS NULL OR avg_price_at_sell > 0)
+
 CREATE TABLE transactions (
     id SERIAL PRIMARY KEY,
     portfolio_id INTEGER NOT NULL REFERENCES portfolios(id) ON DELETE CASCADE,

@@ -6,8 +6,13 @@ REST API endpoints for transaction management.
 Endpoints:
     GET    /api/transactions/<id>                                       → Get transaction by ID
     GET    /api/transactions/portfolio/<portfolio_id>                   → Get transactions by portfolio
+    GET    /api/transactions/portfolio/<portfolio_id>/realized-gain     → Get total realized gain by portfolio
+    
     GET    /api/transactions/stock/<stock_id>                           → Get transactions by stock
     GET    /api/transactions/portfolio/<portfolio_id>/stock/<stock_id>  → Get transactions by stock in a portfolio
+    GET    /api/transactions/portfolio/<portfolio_id>
+           /stock/<stock_id>/realized_gain                              → Get total realized gain by stock
+    
     
     POST   /api/transactions/buy                                        → Create buy transaction
     POST   /api/transactions/sell                                       → Create sell transaction
@@ -22,7 +27,7 @@ from backend.services import (
     PortfolioService,
     StockService
 )
-import yfinance as yf
+
 
 transaction_bp = Blueprint('transaction', __name__)
 
@@ -64,12 +69,36 @@ def get_portfolio_transactions(portfolio_id: int):
         {"portfolio_id": 1, "stock_id": 3, "type": "BUY"...},
         {"portfolio_id": 1, "stock_id": 2, "type": "SELL"...}, ...
         ]
+    Response 404: {"error": "Portfolio not found"}
     """
+    
+    portfolio = portfolio_service.get_portfolio(portfolio_id)
+    if portfolio is None:
+        return jsonify({'error': f'Portfolio {portfolio_id} not found'}), 404
     
     transactions = transaction_service.get_portfolio_transactions(portfolio_id)
     
     return jsonify([asdict(t) for t in transactions]), 200
-   
+
+
+@transaction_bp.route('/portfolio/<int:portfolio_id>/realized-gain', methods=['GET'])
+def get_portfolio_realized_gain(portfolio_id: int):
+    """
+    GET /api/transactions/portfolio/<portfolio_id>/realized-gain
+
+    Returns realized gain by portfolio
+
+    Response 200: {"realized_gain": 4896}
+    Response 404: {"error": "Portfolio not found"}
+    """
+    portfolio = portfolio_service.get_portfolio(portfolio_id)
+    if portfolio is None:
+        return jsonify({'error': f'Portfolio {portfolio_id} not found'}), 404
+    
+    
+    total = transaction_service.get_realized_gain_by_portfolio(portfolio_id)
+    return jsonify({"total_realized_gain": total}), 200
+    
 
 @transaction_bp.route('/stock/<int:stock_id>', methods=['GET'])
 def get_stock_transactions(stock_id: int):
@@ -100,13 +129,50 @@ def get_portfolio_stock_transaction(portfolio_id: int, stock_id: int):
         {"portfolio_id": 1, "stock_id": 3, "type": "BUY"...},
         {"portfolio_id": 1, "stock_id": 2, "type": "SELL"...}, ...
         ]
+    Response 404: {"error": "Portfolio not found"}
+    Response 404: {"error": "Stock not found"}
     """
+    
+    portfolio = portfolio_service.get_portfolio(portfolio_id)
+    if portfolio is None:
+        return jsonify({'error': f'Portfolio {portfolio_id} not found'}), 404
+    
+    
+    stock = stock_service.get_stock(stock_id)
+    if stock is None:
+        return jsonify({'error': f'Stock {stock_id} not found'}), 404
     
     transactions = transaction_service.get_portfolio_stock_transactions(portfolio_id, stock_id)
     
     return jsonify([asdict(t) for t in transactions]), 200
 
-  
+
+@transaction_bp.route('/portfolio/<int:portfolio_id>/stock/<int:stock_id>/realized-gain', methods=['GET'])
+def get_portfolio_stock_realized_gain(portfolio_id: int, stock_id: int):
+    """
+    GET /api/transactions/portfolio/<portfolio_id>/stock/<stock_id>
+
+    Returns a stock realized gain 
+
+    Response 200: Response 200: {"realized_gain": 347}
+    Response 404: {"error": "Portfolio not found"}
+    Response 404: {"error": "Stock not found"}
+    """
+    
+    portfolio = portfolio_service.get_portfolio(portfolio_id)
+    if portfolio is None:
+        return jsonify({'error': f'Portfolio {portfolio_id} not found'}), 404
+    
+    
+    stock = stock_service.get_stock(stock_id)
+    if stock is None:
+        return jsonify({'error': f'Stock {stock_id} not found'}), 404
+    
+    total = transaction_service.get_realized_gain_by_portfolio_and_stock(portfolio_id, stock_id)
+    return jsonify({"stock_realized_gain": total}); 200
+    
+ 
+ 
 # ==========================================
 # CREATE
 # ==========================================
