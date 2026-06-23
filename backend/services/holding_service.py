@@ -12,7 +12,8 @@ from backend.repositories import (
 
 from backend.services import (
     StockService,
-    TransactionService
+    TransactionService, 
+    DividendPaymentService
 )
 
 class HoldingService: 
@@ -22,13 +23,15 @@ class HoldingService:
         stock_repo: StockRepository,
         div_payment_repo: DividendPaymentRepository,
         stock_service: StockService,
-        transaction_service: TransactionService
+        transaction_service: TransactionService,
+        div_payment_service : DividendPaymentService
         ):
         self.holding_repo = holding_repo
         self.stock_repo = stock_repo
         self.div_payment_repo = div_payment_repo
         self.stock_service = stock_service
         self.transaction_service = transaction_service
+        self.div_payment_service = div_payment_service
         
     # ==========================================
     # SIMPLE DELEGATION (just pass to repository)
@@ -118,33 +121,32 @@ class HoldingService:
         
     def get_holding_dividend_ratio_to_portfolio(self, portfolio_id: int) -> dict[str, float]:
         """
-        For each holding of a portfolio, calculate holding total dividend received to portfolio total dividend
+        For each holding of a portfolio, calculate holding total dividend received to portfolio CURRENT total dividend
         
         Ex : this holding got me 13% of all my dividends for this portfolio
         """
         
+        #Current holdings in portfolio ONLY 
         holdings = self.holding_repo.get_by_portfolio(portfolio_id)
-        
-        all_payments = self.div_payment_repo.get_by_portfolio(portfolio_id)
-        total = sum(dp.total_amount for dp in all_payments)
-        if total == 0:
-            return {}
-
         
         by_ticker = {}
         
-        for holding in holdings:
-            holding_payments = self.div_payment_repo.get_by_portfolio_and_stock(portfolio_id, holding.stock_id)
-            holding_total_div = sum(dp.total_amount for dp in holding_payments)
+        for h in holdings:
             
-            by_ticker[holding.ticker] = holding_total_div
+            holding_total_div = self.div_payment_service.get_total_dividend_received_by_stock(portfolio_id, h.stock_id)
             
+            by_ticker[h.ticker] = holding_total_div
+        
+        total = sum(by_ticker.values())
+        if total == 0:
+            return {}
+        
         return {
             ticker: float(value / total * 100)
             for ticker, value in by_ticker.items()
         }
         
-    def get_holding_with_gain(self, portfolio_id: int) -> list[dict]:
+    def get_holdings_with_gain(self, portfolio_id: int) -> list[dict]:
         """Get holdings with current value and gain calculated"""
         
         # 1. Get holdings

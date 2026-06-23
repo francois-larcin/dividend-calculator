@@ -76,6 +76,13 @@ def create_app() -> Flask:
     def portfolio(portfolio_id):
         return render_template('portfolio.html', portfolio_id=portfolio_id)
     
+    @app.route('/holding/<int:portfolio_id>/<int:stock_id>')
+    def holding(portfolio_id, stock_id):
+        return render_template(
+            'holding.html', 
+            portfolio_id=portfolio_id, 
+            stock_id=stock_id)
+    
     #Create repositories
     portfolio_repo = PortfolioRepository(db_config)
     holding_repo = HoldingRepository(db_config)
@@ -101,19 +108,20 @@ def create_app() -> Flask:
         stock_repo=stock_repo
     )
     
-    holding_service = HoldingService(
-        holding_repo=holding_repo,
-        stock_repo=stock_repo,
-        div_payment_repo=div_payment_repo,
-        stock_service=stock_service
-    )
-    
     div_payment_service = DividendPaymentService(
         div_payment_repo=div_payment_repo,
         stock_repo=stock_repo,
         portfolio_repo=portfolio_repo,
         holding_repo=holding_repo,
         portfolio_service=portfolio_service
+    )
+    
+    holding_service = HoldingService(
+        holding_repo=holding_repo,
+        stock_repo=stock_repo,
+        div_payment_repo=div_payment_repo,
+        stock_service=stock_service,
+        transaction_service=transaction_service
     )
     
     #Inject service into routes

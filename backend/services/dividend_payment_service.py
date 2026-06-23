@@ -73,7 +73,7 @@ class DividendPaymentService:
         list_div_payments = self.div_payment_repo.get_by_portfolio_and_stock(portfolio_id, stock_id)
         
         return float(sum(dp.total_amount for dp in list_div_payments))
- 
+
  
     def calculate_portfolio_dividend_yield(self, portfolio_id: int) -> float:
         

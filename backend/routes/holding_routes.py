@@ -61,7 +61,7 @@ def get_holdings_with_gain_data(portfolio_id: int):
     Response 404: {"error": "stock not found"}
     """
     
-    holdings = holding_service.get_holding_with_gain(portfolio_id)
+    holdings = holding_service.get_holdings_with_gain(portfolio_id)
     
     return jsonify(holdings), 200
     
