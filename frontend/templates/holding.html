@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Holding{% endblock %}
+
+{% block content %}
+
+<div id="app" data-portfolio-id="{{ portfolio_id }}" data-stock-id="{{ stock_id }}">
+
+    <!-- Back button-->
+    <div class="mb-6">
+        <a href="/portfolio/{{ portfolio_id }}" class="bg-blue-500 text-white px-6 py-3 rounded-lg">
+            Back
+        </a>
+    </div>
+
+    <!-- Header = Company name, ticker, ... -->
+    <div class="mb-6">
+        <h2 class="text-2xl font-bold">
+            <span id="holding-company">-</span>
+            <span id="holding-ticker">-</span>
+        </h2>
+    </div>
+
+
+    <!-- Two columns : description (left) + stats (right)-->
+    <div class="grid grid-cols-2 gap-6 mb-6">
+
+        <!-- Description (left)-->
+        <div class="bg-white rounded-lg shadow p-6">
+            <p class="text-2xl font-bold">Company description</p>
+            <h3 class="font-bold"> 
+                <span id="holding-description" class="text-gray-500"> - </span>
+            </h3>
+        </div>
+
+
+        <!-- Stats (right)-->
+        <div class="grid grid-cols-2 gap-4">
+            
+            <div class="bg-white rounded-lg shadow p-6">
+                <p class="text-gray-500">Unreal. gain</p>
+                <h3 id="holding-unrealized-gain" class="text-2xl font-bold"></h3>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-6">
+                <p class="text-gray-500">Real. gain</p>
+                <h3 id="holding-realized-gain" class="text-2xl font-bold"></h3>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-6">
+                <p class="text-gray-500">Part from total</p>
+                <h3 id="holding-weight" class="text-2xl font-bold"></h3>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-6">
+                <p class="text-gray-500">Total invested</p>
+                <h3 id="holding-total-invested" class="text-2xl font-bold"></h3>
+            </div>
+        </div> 
+    </div>
+
+    
+
+
+</div>
+{% endblock %}
+
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/holding.js') }}"></script>
+{% endblock %}

@@ -4,7 +4,7 @@ let portfolioCurrency = ''
 function createHolding(holding) {
 
     return `
-    <tr>
+    <tr onclick="viewHolding('${holding.stock_id}')" class="cursor-pointer hover:bg-gr">
         <td class="py-3 pr-4 max-w-[150px] truncate" title="${holding.company_name}">
         ${holding.company_name}
         </td>
@@ -355,6 +355,12 @@ async function loadPortfolioRealizedGain(portfolioId) {
     } else {
         gainElement.classList.add('text-red-500')
     }
+}
+
+
+// Navigate to the holding page
+function viewHolding(stockId) {
+    window.location.href = `/holding/${portfolioId}/${stockId}`
 }
 
 
