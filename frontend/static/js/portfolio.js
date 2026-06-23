@@ -5,7 +5,9 @@ function createHolding(holding) {
 
     return `
     <tr>
-        <td class="py-3">${holding.company_name}</td>
+        <td class="py-3 pr-4 max-w-[150px] truncate" title="${holding.company_name}">
+        ${holding.company_name}
+        </td>
         <td class="py-3">${holding.ticker}</td>
         <td class="py-3">${holding.currency}</td>
         <td class="py-3">${holding.total_shares}</td>
@@ -31,6 +33,12 @@ function createHolding(holding) {
             maximumFractionDigits: 2
         })} %</td>
 
+        <td class="py-3 ${holding.realized_gain >= 0 ? 'text-green-500' : 'text-red-500'}">
+        ${holding.realized_gain.toLocaleString('fr-FR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        })}</td>
+
         <td class="py-3">
             <button onclick="selectStock('${holding.ticker}', '${holding.company_name}')" class="bg-green-500 text-white px-4 py-2 rounded-lg">
                 Buy
@@ -40,6 +48,7 @@ function createHolding(holding) {
                 Sell
             </button>
         </td>
+        
     </tr>
     `
 }
@@ -261,6 +270,7 @@ async function sellStock(maxShares) {
     closeModal('sell-modal')
     loadHoldings(portfolioId)
     loadPortfolioGainData(portfolioId)
+    loadPortfolioRealizedGain(portfolioId)
     lucide.createIcons()
 }
 

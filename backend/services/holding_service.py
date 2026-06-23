@@ -11,7 +11,8 @@ from backend.repositories import (
 )
 
 from backend.services import (
-    StockService
+    StockService,
+    TransactionService
 )
 
 class HoldingService: 
@@ -20,12 +21,14 @@ class HoldingService:
         holding_repo: HoldingRepository,
         stock_repo: StockRepository,
         div_payment_repo: DividendPaymentRepository,
-        stock_service: StockService
+        stock_service: StockService,
+        transaction_service: TransactionService
         ):
         self.holding_repo = holding_repo
         self.stock_repo = stock_repo
         self.div_payment_repo = div_payment_repo
         self.stock_service = stock_service
+        self.transaction_service = transaction_service
         
     # ==========================================
     # SIMPLE DELEGATION (just pass to repository)
@@ -153,19 +156,23 @@ class HoldingService:
             # 2. For each holding, fetch yfinance price
             current_price = self.stock_service.get_current_price(h.ticker)
             
-            # 3. Calculate gain & gain_percent, current_value and total_invested
-            gain = h.unrealized_gain(current_price)
-            gain_percent = h.gain_percentage(current_price)
+            # 3. Calculate unrealized gain & gain_percent, current_value and total_invested
+            unrealized_gain = h.unrealized_gain(current_price)
+            unrealized_gain_percent = h.gain_percentage(current_price)
             current_value = h.current_value(current_price)
             total_invested = h.total_invested
             
-            # 4. Convert HoldingData into dict so I can enrich it
+            #4 Calculate realized gain
+            realized_gain = self.transaction_service.get_realized_gain_by_portfolio_and_stock(portfolio_id, h.stock_id)
+            
+            # 5. Convert HoldingData into dict so I can enrich it
             holding_dict = asdict(h)
             holding_dict["stock_price"] = current_price
             holding_dict["current_value"] = current_value
-            holding_dict["gain"] = gain
-            holding_dict["gain_percent"] = gain_percent
+            holding_dict["gain"] = unrealized_gain
+            holding_dict["gain_percent"] = unrealized_gain_percent
             holding_dict["total_invested"] = total_invested
+            holding_dict["realized_gain"] = realized_gain
             
             result.append(holding_dict)
             #print(holding_dict)
