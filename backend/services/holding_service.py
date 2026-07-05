@@ -16,6 +16,8 @@ from backend.services import (
     DividendPaymentService
 )
 
+import yfinance as yf
+
 class HoldingService: 
     def __init__(
         self, 
@@ -119,7 +121,11 @@ class HoldingService:
             'dividends': dividends
         }
         
-    def get_holding_dividend_ratio_to_portfolio(self, portfolio_id: int) -> dict[str, float]:
+    def get_holdings_dividend_ratio_to_portfolio(
+        self, 
+        portfolio_id: int,
+        portfolio_total_dividends: float
+        ) -> dict[str, float]:
         """
         For each holding of a portfolio, calculate holding total dividend received to portfolio CURRENT total dividend
         
@@ -133,51 +139,109 @@ class HoldingService:
         
         for h in holdings:
             
-            holding_total_div = self.div_payment_service.get_total_dividend_received_by_stock(portfolio_id, h.stock_id)
-            
-            by_ticker[h.ticker] = holding_total_div
+            by_ticker[h.ticker] = self._get_holding_dividend_ratio_to_portfolio(portfolio_id, h.stock_id, portfolio_total_dividends)
         
-        total = sum(by_ticker.values())
-        if total == 0:
-            return {}
+        return by_ticker
         
-        return {
-            ticker: float(value / total * 100)
-            for ticker, value in by_ticker.items()
-        }
+    def _get_holding_dividend_ratio_to_portfolio(
+        self, 
+        portfolio_id:int,
+        stock_id:int,
+        portfolio_total_dividends: float
+    ) -> float:
+        """
+        For a holding, calculate holding total dividend received to portfolio CURRENT total dividend
         
-    def get_holdings_with_gain(self, portfolio_id: int) -> list[dict]:
-        """Get holdings with current value and gain calculated"""
+        Ex : this holding got me 13% of all my dividends for this portfolio
+        """
+        
+        # 1. Get total div received for this holding
+        holding_total_div = self.div_payment_service.get_total_dividend_received_by_stock(portfolio_id, stock_id)
+        
+        if holding_total_div > 0 and portfolio_total_dividends > 0:
+            return holding_total_div / portfolio_total_dividends * 100
+        else:
+            return 0.0
+        
+        
+    def get_all_holdings_detail(self, portfolio_id: int) -> list[dict]:
+        """Get portfolio holdings with full detail (gain, description, dividend ratio to portfolio, ...)"""
         
         # 1. Get holdings
         holdings = self.holding_repo.get_by_portfolio(portfolio_id)
-        result = []
         
-        
+        # 2. Fetch all current prices ONCE
+        prices = {}
         for h in holdings:
-            # 2. For each holding, fetch yfinance price
-            current_price = self.stock_service.get_current_price(h.ticker)
-            
-            # 3. Calculate unrealized gain & gain_percent, current_value and total_invested
-            unrealized_gain = h.unrealized_gain(current_price)
-            unrealized_gain_percent = h.gain_percentage(current_price)
-            current_value = h.current_value(current_price)
-            total_invested = h.total_invested
-            
-            #4 Calculate realized gain
-            realized_gain = self.transaction_service.get_realized_gain_by_portfolio_and_stock(portfolio_id, h.stock_id)
-            
-            # 5. Convert HoldingData into dict so I can enrich it
-            holding_dict = asdict(h)
-            holding_dict["stock_price"] = current_price
-            holding_dict["current_value"] = current_value
-            holding_dict["gain"] = unrealized_gain
-            holding_dict["gain_percent"] = unrealized_gain_percent
-            holding_dict["total_invested"] = total_invested
-            holding_dict["realized_gain"] = realized_gain
-            
-            result.append(holding_dict)
-            #print(holding_dict)
-            
-        # 4. Return enriched dicts list
-        return result
+            prices[h.stock_id] = self.stock_service.get_current_price(h.ticker)
+        
+        # 3. Calculate totals ONCE 
+        portfolio_current_value = sum(
+            h.current_value(prices[h.stock_id]) for h in holdings
+            )
+        
+        portfolio_total_dividends = self.div_payment_service.get_total_dividend_received_by_portfolio(portfolio_id)
+        
+        # 4. Enrich EACH holding
+        return [
+            self.get_holding_detail(h, prices[h.stock_id], portfolio_current_value, portfolio_total_dividends)
+            for h in holdings
+        ]
+    
+    def get_holding_detail(
+        self,
+        h: HoldingData,
+        current_price: float,
+        portfolio_current_value: float,
+        portfolio_total_dividends: float
+    ) -> dict:
+        """Get holding with full detailed informations"""
+        
+        # 1. Get portfolio_id & stock_id from holding
+        portfolio_id = h.portfolio_id
+        stock_id = h.stock_id
+        
+        # 2. Get holding infos
+        unrealized_gain = h.unrealized_gain(current_price)
+        unrealized_gain_percent = h.gain_percentage(current_price)
+        current_value = h.current_value(current_price)
+        total_invested = h.total_invested
+        realized_gain = self.transaction_service.get_realized_gain_by_portfolio_and_stock(portfolio_id, stock_id)
+        description = yf.Ticker(h.ticker).info.get('longBusinessSummary')
+        weight = (current_value / portfolio_current_value * 100) if portfolio_current_value > 0 else 0.0
+        dividend_ratio = self._get_holding_dividend_ratio_to_portfolio(portfolio_id, stock_id, portfolio_total_dividends)
+        
+        # 3. Convert HoldingData into dict to enrich it
+        h_dict = asdict(h)
+        h_dict["stock_price"] = current_price
+        h_dict["current_value"] = current_value
+        h_dict["gain"] = unrealized_gain
+        h_dict["gain_percent"] = unrealized_gain_percent
+        h_dict["total_invested"] = total_invested
+        h_dict["realized_gain"] = realized_gain
+        h_dict["description"] = description
+        h_dict["weight"] = weight
+        h_dict["dividend_ratio"] = dividend_ratio
+        
+        # 4. Return enriched dict
+        return h_dict
+    
+    def get_one_holding_detail(self, portfolio_id:int, stock_id:int) -> dict | None:
+        """Calculate all needed totals and call get_holding_detail()"""
+        
+        holding = self.get_holding(portfolio_id, stock_id)
+        if holding is None:
+            return None
+        
+        #Calculate needed totals
+        current_price = self.stock_service.get_current_price(holding.ticker)
+        
+        holdings = self.holding_repo.get_by_portfolio(portfolio_id)
+        prices = {h.stock_id: self.stock_service.get_current_price(h.ticker) for h in holdings}
+        portfolio_current_value = sum(h.current_value(prices[h.stock_id]) for h in holdings)
+        
+        portfolio_total_dividends = self.div_payment_service.get_total_dividend_received_by_portfolio(portfolio_id)
+        
+        return self.get_holding_detail(holding, current_price, portfolio_current_value, portfolio_total_dividends)
+        
+        

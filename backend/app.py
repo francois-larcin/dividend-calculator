@@ -121,7 +121,8 @@ def create_app() -> Flask:
         stock_repo=stock_repo,
         div_payment_repo=div_payment_repo,
         stock_service=stock_service,
-        transaction_service=transaction_service
+        transaction_service=transaction_service,
+        div_payment_service=div_payment_service
     )
     
     #Inject service into routes
@@ -135,6 +136,7 @@ def create_app() -> Flask:
     
     holding_routes.holding_service = holding_service
     holding_routes.portfolio_service = portfolio_service
+    holding_routes.div_payment_service = div_payment_service
     
     dividend_payment_routes.div_payment_service = div_payment_service
     dividend_payment_routes.portfolio_service = portfolio_service

@@ -74,7 +74,7 @@ async function loadPortfolio(portfolioId) {
 
 async function loadHoldings(portfolioId) {
     // 1. Get the holdings
-    const response = await fetch(`/api/holdings/${portfolioId}/with-gain`)
+    const response = await fetch(`/api/holdings/${portfolioId}/detail`)
     const holdings = await response.json()
 
     console.log('Holdings', holdings);
