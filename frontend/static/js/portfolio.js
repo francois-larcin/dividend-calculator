@@ -75,16 +75,57 @@ async function loadPortfolio(portfolioId) {
 async function loadHoldings(portfolioId) {
     // 1. Get the holdings
     const response = await fetch(`/api/holdings/${portfolioId}/detail`)
+
+    // 2. Convert into JSON
     const holdings = await response.json()
-
-    console.log('Holdings', holdings);
     
-
-    // 2. Display in the DOM 
+    // 3. Display in the DOM 
     const tbody = document.querySelector('#holdings-table')
     tbody.innerHTML = holdings.map(h => createHolding(h)).join('')
 
+    // 4. Relaod Icons
     lucide.createIcons()
+
+    // 5. Return holdings for charts use
+    return holdings
+}
+
+async function createAllocationChart(holdings) {
+    // 1. Extract company tickers 
+    const tickers = holdings.map(h => h.ticker);
+
+    // 2. Extract holdings current value
+    const currentValues = holdings.map(h => h.current_value);
+
+    // 3. Chart creation
+    const ctx = document.querySelector('#allocation-chart')
+
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: tickers, 
+            datasets: [{
+                data: currentValues,
+                backgroundColor: [
+                    '#3B82F6',  // blue
+                    '#10B981',  // green
+                    '#F59E0B',  // yellow
+                    '#EF4444',  // red
+                    '#8B5CF6',  // purple
+                    '#EC4899',  // pink
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'right'
+                }
+            }
+        }
+    })
 }
 
 // Stock search
@@ -364,10 +405,19 @@ function viewHolding(stockId) {
 }
 
 
-// API call at page loading 
-loadPortfolio(portfolioId) // Quick (just DB)
-loadHoldings(portfolioId)  // Quick (just DB)
-loadPortfolioRealizedGain(portfolioId) // Quick (just DB)
+// Page Initialization
+async function init() {
+    loadPortfolio(portfolioId) // Quick (just DB)
 
-loadPortfolioValue(portfolioId)  // Slow (yfinance)
-loadPortfolioGainData(portfolioId)  // Slow (yfinance)
+    const holdings = await loadHoldings(portfolioId)  // Quick (just DB)
+    createAllocationChart(holdings)
+
+
+    loadPortfolioRealizedGain(portfolioId) // Quick (just DB)
+    loadPortfolioValue(portfolioId)  // Slow (yfinance)
+    loadPortfolioGainData(portfolioId)  // Slow (yfinance) 
+}
+
+
+init()
+
