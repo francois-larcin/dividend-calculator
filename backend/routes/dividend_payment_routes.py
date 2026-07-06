@@ -14,6 +14,8 @@ Endpoints:
     GET    /api/dividends/<portfolio_id>/<stock_id>/yield → Get a stock yield
     GET    /api/dividends/<portfolio_id>/date-range?start=...&end=... → Get portfolio div payments for a specific time range
     
+    GET /api/holdings/<portfolio_id>/dividend-history-year   → Portfolio div history for past 12 months
+    
     
     POST   /api/dividends/sync/<portfolio_id>        → Create buy transaction
     DELETE /api/dividends/<id>                       → Delete div_payment
@@ -134,6 +136,28 @@ def get_by_date_range(portfolio_id: int):
     payments = div_payment_service.get_by_portfolio_and_date_range(portfolio_id, start_date, end_date)
     
     return jsonify([asdict(d) for d in payments]), 200
+
+@div_payment_bp.route('/<int:portfolio_id>/dividend-history-year', methods=['GET'])
+def get_portfolio_dividend_history_12_months(portfolio_id: int):
+    """
+    GET /api/holdings/<portfolio_id>/<stock_id>/dividend-history
+    
+    Response 200: 
+        {
+        "2024-01": 150.0,
+        "2024-02": 0.0,    
+        "2024-03": 280.0,
+        ...
+        }
+    """
+    portfolio = portfolio_service.get_portfolio(portfolio_id)
+    
+    if portfolio is None:
+        return jsonify({'error': f'Portfolio {portfolio_id} not found'}), 404
+    
+    div_payments = div_payment_service.get_monthly_dividends(portfolio_id)
+    
+    return jsonify(div_payments), 200
 
 
 # ==========================================

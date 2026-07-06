@@ -16,6 +16,9 @@ import yfinance as yf
 
 from backend.services.portfolio_service import PortfolioService
 
+from datetime import date
+from dateutil.relativedelta import relativedelta
+
 class DividendPaymentService:
     def __init__(
         self,
@@ -110,7 +113,38 @@ class DividendPaymentService:
             return 0.0
         
         return float((total_div_received / holding.total_invested) * 100)
-       
+    
+    
+    def get_monthly_dividends(self, portfolio_id: int) -> dict[str, float]:
+        """
+        Returns portfolio total dividends received per month for the last 12 months
+        
+        Returns:
+            {"2024-01": 150.0, "2024-02": 0.0, ..., "2024-12": 280.0}
+        """
+        
+        # 1. Get start date and end date
+        today = date.today()
+        start_date = today - relativedelta(months=12)
+        
+        # 2. Get dividends from past 12 months
+        
+        div_payments = self.div_payment_repo.get_by_portfolio_and_date_range(portfolio_id, start_date=start_date, end_date=today)
+        
+        # 3. Create a dict with every month and initialize at 0.0
+        monthly = {}
+        
+        for i in range(12):
+            month = (today - relativedelta(months=i)).strftime('%Y-%m')
+            monthly[month] = 0.0
+        
+        # 4. Regroup per month
+        for dp in div_payments:
+            month_key = dp.paid_at.strftime('%Y-%m')
+            # If month already exists -> add, else -> create the value
+            monthly[month_key] = monthly.get(month_key, 0) + float(dp.total_amount)
+        
+        return monthly 
         
     def sync_dividends(self, portfolio_id: int) -> int:
         """

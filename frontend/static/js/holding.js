@@ -33,5 +33,10 @@ async function loadHoldingDetail(portfolioId, stockId) {
 }
 
 //API calls at page loading
+async function init(params) {
+    loadHoldingDetail(portfolioId, stockId)
+    
+}
 
-loadHoldingDetail(portfolioId, stockId)
+init()
+

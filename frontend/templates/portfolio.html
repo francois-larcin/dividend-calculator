@@ -221,11 +221,56 @@
         </div>
     </div>
 
-<!-- Allocation chart-->
- <div class="bg-white rounded-lg shadow p-6 mb-6" style="max-height: 400px;">
-    <h3 class="font-bold text-xl mb-4">Portfolio Allocation</h3>
-    <canvas id="allocation-chart"></canvas>
- </div>
+
+    <!-- Charts First Line -->
+    <div class="grid grid-cols-3 gap-4 mb-6">
+
+        <!-- Holdings allocation chart-->
+        <div class="bg-white rounded-lg shadow p-6 mb-6" style="max-height: 400px; position: relative;">
+            <h3 class="font-bold text-xl mb-4 text-center">
+                Holdings Allocation
+            </h3>
+            <canvas id="holding-chart"></canvas>
+        </div>
+
+        <!-- Currency allocation chart-->
+        <div class="bg-white rounded-lg shadow p-6 mb-6" style="max-height: 400px; position: relative;">
+            <h3 class="font-bold text-xl mb-4 text-center">
+                Currency Allocation
+            </h3>
+            <canvas id="currency-chart"></canvas>
+        </div>
+        
+        <!-- Dividend allocation chart-->
+        <div class="bg-white rounded-lg shadow p-6 mb-6" style="max-height: 400px; position: relative;">
+            <h3 class="font-bold text-xl mb-4 text-center">
+                Dividends Contribution Rate
+            </h3>
+            <canvas id="dividend-contribution-chart"></canvas>
+        </div>
+    </div>
+
+    <!-- Charts Second Line -->
+    <div class="grid grid-cols-3 gap-4 mb-6">
+
+        <!-- Sector allocation chart 1/3-->
+        <div class="col-span-1 bg-white rounded-lg shadow p-6 mb-6" style="max-height: 400px; position: relative;">
+            <h3 class="font-bold text-xl mb-4 text-center">
+                Sector Allocation
+            </h3>
+            <canvas id="sector-chart"></canvas>
+        </div>
+
+        <!-- 12 months dividend history 2/3-->
+        <div class="col-span-2 rounded-lg shadow p-6 mb-6" style="max-height: 400px; position: relative;">
+            <h3 class="font-bold text-xl mb-4 text-center">
+                Dividend history
+            </h3>
+            <canvas id="dividend-history-chart"></canvas>
+        </div>
+
+
+    </div>
 
 
 </div>

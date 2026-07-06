@@ -72,6 +72,7 @@ async function loadPortfolio(portfolioId) {
 
 }
 
+
 async function loadHoldings(portfolioId) {
     // 1. Get the holdings
     const response = await fetch(`/api/holdings/${portfolioId}/detail`)
@@ -90,6 +91,7 @@ async function loadHoldings(portfolioId) {
     return holdings
 }
 
+
 async function createAllocationChart(holdings) {
     // 1. Extract company tickers 
     const tickers = holdings.map(h => h.ticker);
@@ -98,35 +100,61 @@ async function createAllocationChart(holdings) {
     const currentValues = holdings.map(h => h.current_value);
 
     // 3. Chart creation
-    const ctx = document.querySelector('#allocation-chart')
+    createChart('#holding-chart', 'doughnut', tickers, currentValues)
+}
 
-    new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: tickers, 
-            datasets: [{
-                data: currentValues,
-                backgroundColor: [
-                    '#3B82F6',  // blue
-                    '#10B981',  // green
-                    '#F59E0B',  // yellow
-                    '#EF4444',  // red
-                    '#8B5CF6',  // purple
-                    '#EC4899',  // pink
-                ]
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            plugins: {
-                legend: {
-                    position: 'right'
-                }
-            }
-        }
+
+async function createCurrencyChart(portfolioId) {
+    const response = await fetch(`/api/holdings/${portfolioId}/allocation/currency`)
+    const data = await response.json()
+
+    const labels = Object.keys(data) // currencies
+    const values = Object.values(data) // %
+
+    createChart('#currency-chart', 'doughnut', labels, values)
+}
+
+
+async function createDividendContributionChart(portfolioId, portfolioTotalDividends) {
+    const response = await fetch(`/api/holdings/${portfolioId}/dividend-ratio`)
+    
+    const data = await response.json()
+    
+    const labels = Object.keys(data)
+    const values = Object.values(data)
+    
+    createChart('#dividend-contribution-chart', 'doughnut', labels, values)
+}
+
+
+async function createSectorChart(portfolioId) {
+    const response = await fetch(`/api/holdings/${portfolioId}/allocation/sector`)
+
+    const data = await response.json()
+
+    const labels = Object.keys(data)
+    const values = Object.values(data) // % 
+
+    createChart('#sector-chart', 'doughnut', labels, values, {
+        legendPosition: 'bottom'
     })
 }
+
+
+async function createDividendHistoryChart(portfolioId) {
+    const response = await fetch(`/api/dividends/${portfolioId}/dividend-history-year`)
+    
+    const data = await response.json()
+
+    const labels = Object.keys(data)
+    const values = Object.values(data)
+
+    createChart('#dividend-history-chart', 'bar', labels, values, {
+        barColor: '#3B82F6',
+        maintainAspectRatio: false
+    })
+}
+
 
 // Stock search
 let searchTimeout = null
@@ -334,7 +362,6 @@ async function loadPortfolioValue(portfolioId) {
 }
 
 
-
 // Fecth total gain, gain percent, total value and invested value
 async function loadPortfolioGainData(portfolioId) {
 
@@ -376,6 +403,7 @@ async function loadPortfolioGainData(portfolioId) {
     }
 }
 
+
 // Fecth total realized gain + conditional display
 async function loadPortfolioRealizedGain(portfolioId) {
     // API call
@@ -411,6 +439,10 @@ async function init() {
 
     const holdings = await loadHoldings(portfolioId)  // Quick (just DB)
     createAllocationChart(holdings)
+    createSectorChart(portfolioId)
+    createCurrencyChart(portfolioId)
+    createDividendContributionChart(portfolioId)
+    createDividendHistoryChart(portfolioId)
 
 
     loadPortfolioRealizedGain(portfolioId) // Quick (just DB)

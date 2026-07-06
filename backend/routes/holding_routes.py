@@ -12,6 +12,8 @@ GET /api/holdings/<portfolio_id>/allocation/currency          → Allocation per
 GET /api/holdings/<portfolio_id>/allocation/sector            → Allocation per sector
 GET /api/holdings/<portfolio_id>/dividend-ratio               → Dividend ratio
 GET /api/holdings/<portfolio_id>/<stock_id>/dividend-history  → Dividend history
+
+
 """
 
 from flask import Blueprint, jsonify, request
@@ -175,11 +177,10 @@ def get_holdings_dividend_ratio_to_portfolio(portfolio_id: int):
     """
     portfolio = portfolio_service.get_portfolio(portfolio_id)
     
-    portfolio_total_dividends = div_payment_service.get_total_dividend_received_by_portfolio(portfolio_id)
-    
-    
     if portfolio is None:
         return jsonify({'error': f'Portfolio {portfolio_id} not found'}), 404
+    
+    portfolio_total_dividends = div_payment_service.get_total_dividend_received_by_portfolio(portfolio_id)
     
     dividend_ratio = holding_service.get_holdings_dividend_ratio_to_portfolio(portfolio_id, portfolio_total_dividends)
     

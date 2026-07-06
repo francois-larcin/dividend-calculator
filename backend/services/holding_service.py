@@ -18,6 +18,7 @@ from backend.services import (
 
 import yfinance as yf
 
+
 class HoldingService: 
     def __init__(
         self, 
@@ -48,11 +49,9 @@ class HoldingService:
         """Get a holding in a portfolio"""
         return self.holding_repo.get_by_id(portfolio_id, stock_id)
     
-    
     # ==========================================
     # BUSINESS LOGIC - ANALYSE
     # ==========================================
-    
     
     def get_portfolio_allocation_by_sector(self, portfolio_id: int) -> dict[str, float]:
         """Calculate portfolio allocation by sector
@@ -100,6 +99,7 @@ class HoldingService:
             for currency, value in by_currency.items()
         }
         
+        
     def get_holding_dividend_history(
         self,
         portfolio_id: int,
@@ -120,6 +120,7 @@ class HoldingService:
             'holding': holding,
             'dividends': dividends
         }
+        
         
     def get_holdings_dividend_ratio_to_portfolio(
         self, 
@@ -142,6 +143,7 @@ class HoldingService:
             by_ticker[h.ticker] = self._get_holding_dividend_ratio_to_portfolio(portfolio_id, h.stock_id, portfolio_total_dividends)
         
         return by_ticker
+        
         
     def _get_holding_dividend_ratio_to_portfolio(
         self, 
@@ -188,6 +190,7 @@ class HoldingService:
             for h in holdings
         ]
     
+    
     def get_holding_detail(
         self,
         h: HoldingData,
@@ -226,6 +229,7 @@ class HoldingService:
         # 4. Return enriched dict
         return h_dict
     
+    
     def get_one_holding_detail(self, portfolio_id:int, stock_id:int) -> dict | None:
         """Calculate all needed totals and call get_holding_detail()"""
         
@@ -243,5 +247,13 @@ class HoldingService:
         portfolio_total_dividends = self.div_payment_service.get_total_dividend_received_by_portfolio(portfolio_id)
         
         return self.get_holding_detail(holding, current_price, portfolio_current_value, portfolio_total_dividends)
+    
+    
+    
+            
+        
+    
+        
+        
         
         
