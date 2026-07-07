@@ -80,6 +80,19 @@
                         legend: {
                             display: type !== 'bar',
                             position: options.legendPosition || 'right',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.parsed
+                                    const weight = options.weights ? options.weights[context.dataIndex].toFixed(2) : null
+                                    
+                                    if (weight) {
+                                        return `${context.label}: ${value.toFixed(2)} (${weight}%)`
+                                    }
+                                    return `${context.label}: ${value.toFixed(2)}`
+                                }
+                            }
                         }
                     }
                 }

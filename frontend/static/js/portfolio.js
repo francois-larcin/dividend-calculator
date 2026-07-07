@@ -96,11 +96,16 @@ async function createAllocationChart(holdings) {
     // 1. Extract company tickers 
     const tickers = holdings.map(h => h.ticker);
 
-    // 2. Extract holdings current value
+    // 2. Extract holding weight to portfolio
+    const weights = holdings.map(h => h.weight)
+
+    // 3. Extract holdings current value
     const currentValues = holdings.map(h => h.current_value);
 
-    // 3. Chart creation
-    createChart('#holding-chart', 'doughnut', tickers, currentValues)
+    // 4. Chart creation
+    createChart('#holding-chart', 'doughnut', tickers, currentValues, {
+        weights: weights
+    })
 }
 
 
@@ -136,7 +141,9 @@ async function createSectorChart(portfolioId) {
     const values = Object.values(data) // % 
 
     createChart('#sector-chart', 'doughnut', labels, values, {
-        legendPosition: 'bottom'
+        maintainAspectRatio: false,
+        legendPosition: 'bottom',
+        aspectRatio: 1
     })
 }
 
@@ -151,7 +158,7 @@ async function createDividendHistoryChart(portfolioId) {
 
     createChart('#dividend-history-chart', 'bar', labels, values, {
         barColor: '#3B82F6',
-        maintainAspectRatio: false
+        maintainAspectRatio: false,
     })
 }
 
@@ -452,4 +459,3 @@ async function init() {
 
 
 init()
-
